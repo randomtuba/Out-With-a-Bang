@@ -1,0 +1,252 @@
+body {
+  font-family: 'Courier New', monospace;
+  margin: 2em;
+  text-align: center;
+  background-color: black;
+}
+
+div {
+  color: white;
+}
+
+button {
+  font-family: 'Courier New', monospace;
+}
+
+span {
+  color: inherit;
+}
+
+.tab {
+  color: red;
+  background-color: black;
+  border-color: red;
+  transition-duration: 0.2s;
+  font-size: 18px;
+}
+
+.countdownTab {
+  color: #E6756B;
+  background-color: black;
+  border-color: #E6756B;
+  transition-duration: 0.2s;
+  font-size: 18px;
+}
+
+.escapeTab {
+  color: #a6f9ff;
+  background-color: black;
+  border-color: #a6f9ff;
+  transition-duration: 0.2s;
+  font-size: 18px;
+}
+
+.epsilonTab {
+  color: #BD9100;
+  background-color: black;
+  border-color: #BD9100;
+  transition-duration: 0.2s;
+  font-size: 18px;
+}
+
+#escapeButton, #epsilonButton {
+  width: 150px;
+  height: 75px;
+  font-size: 14px;
+}
+
+.tab:hover {
+  color: white;
+  background-color: red;
+}
+
+.countdownTab:hover {
+  color: white;
+  background-color: #E6756B;
+}
+
+.escapeTab:hover {
+  color: black;
+  background-color: #a6f9ff;
+}
+
+.epsilonTab:hover {
+  color: white;
+  background-color: #BD9100;
+}
+
+.countdown {
+  font-size: 20px;
+}
+
+#cPoints {
+  color: #E6756B;
+}
+
+.coloredButton {
+  width: 75px;
+  height: 75px;
+}
+
+.achievementLocked {
+  background-color: red
+}
+
+.achievementCompleted {
+  background-color: green
+}
+
+.upgradeLocked {
+  background-color: red;
+  color: black;
+  border-color: red;
+}
+
+.upgradeBuyable {
+  background-color: #AAAA00;
+  color: white;
+  border-color: #AAAA00;
+}
+
+.upgradeBought {
+  background-color: green;
+  color: white;
+  border-color: green;
+}
+
+.autocenter {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.buyableLocked {
+  width: 150px;
+  height: 150px;
+  color: red;
+  background-color: black;
+  border-color: red;
+}
+
+.buyableUnlocked {
+  width: 150px;
+  height: 150px;
+  color: #E6756B;
+  background-color: black;
+  border-color: #E6756B;
+  transition-duration: 0.2s;
+}
+
+.buyableUnlocked:hover {
+  color: white;
+  background-color: #E6756B;
+}
+
+.energyBuyableUnlocked {
+  width: 150px;
+  height: 150px;
+  color: yellow;
+  background-color: black;
+  border-color: yellow;
+  transition-duration: 0.2s;
+}
+
+.energyBuyableUnlocked:hover {
+  color: black;
+  background-color: yellow;
+}
+
+.decelBuyableUnlocked {
+  width: 150px;
+  height: 150px;
+  color: #0C9FED;
+  background-color: black;
+  border-color: #0C9FED;
+  transition-duration: 0.2s;
+}
+
+.decelBuyableUnlocked:hover {
+  color: black;
+  background-color: #0C9FED;
+}
+
+.superBuyableUnlocked {
+  width: 150px;
+  height: 150px;
+  color: lime;
+  background-color: black;
+  border-color: lime;
+  transition-duration: 0.2s;
+}
+
+.superBuyableUnlocked:hover {
+  color: black;
+  background-color: lime;
+}
+
+.condenserUnlocked {
+  width: 250px;
+  height: 250px;
+  color: cyan;
+  background-color: black;
+  border-color: cyan;
+  transition-duration: 0.2s;
+}
+
+.condenserUnlocked:hover {
+  color: black;
+  background-color: cyan;
+}
+
+.decelerateButton {
+  color: #0C9FED;
+  background-color: black;
+  border-color: #0C9FED;
+  border-width: 4px;
+  transition-duration: 0.2s;
+}
+
+.decelerateButton:hover{
+  color: white;
+  background-color: #0C9FED;
+}
+
+.milestoneLocked {
+  background-color: #ff8585;
+  border-color: red;
+  border-radius: 5px;
+  border-width: 5px;
+  width: 500px;
+  height: 100px;
+}
+
+.milestoneUnlocked {
+  background-color: #9cffa4;
+  border-color: lime;
+  border-radius: 5px;
+  border-width: 5px;
+  width: 500px;
+  height: 100px;
+}
+
+.unlockedChallenge {
+  color: black;
+  background-color: #ffd54a;
+  border-color: #BD9100;
+  font-size: 14px;
+}
+
+.chalMilestoneLocked {
+  color: #ff8585;
+}
+
+.chalMilestoneUnlocked {
+  color: #9cffa4;
+}
+
+.dilationButton {
+  color: lime;
+  background-color: black;
+  border-color: lime;
+  height: 75px;
+  width: 150px;
+}
