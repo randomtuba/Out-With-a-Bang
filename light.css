@@ -2,7 +2,7 @@ body {
   font-family: 'Courier New', monospace;
   margin: 2em;
   text-align: center;
-  background-color: black;
+  background-color: #555555;
 }
 
 div {
@@ -18,32 +18,32 @@ span {
 }
 
 .tab {
-  color: red;
-  background-color: black;
+  color: black;
+  background-color: red;
   border-color: red;
   transition-duration: 0.2s;
   font-size: 18px;
 }
 
 .countdownTab {
-  color: #E6756B;
-  background-color: black;
+  color: black;
+  background-color: #E6756B;
   border-color: #E6756B;
   transition-duration: 0.2s;
   font-size: 18px;
 }
 
 .escapeTab {
-  color: #a6f9ff;
-  background-color: black;
+  color: black;
+  background-color: #a6f9ff;
   border-color: #a6f9ff;
   transition-duration: 0.2s;
   font-size: 18px;
 }
 
 .epsilonTab {
-  color: #BD9100;
-  background-color: black;
+  color: black;
+  background-color: #BD9100;
   border-color: #BD9100;
   transition-duration: 0.2s;
   font-size: 18px;
@@ -56,23 +56,27 @@ span {
 }
 
 .tab:hover {
-  color: white;
-  background-color: red;
+  color: red;
+  background-color: #660000;
+  border-color: #660000;
 }
 
 .countdownTab:hover {
-  color: white;
-  background-color: #E6756B;
+  color: #E6756B;
+  background-color: #8f4444;
+  border-color: #8f4444;
 }
 
 .escapeTab:hover {
-  color: black;
-  background-color: #a6f9ff;
+  color: #a6f9ff;
+  background-color: teal;
+  border-color: teal;
 }
 
 .epsilonTab:hover {
-  color: white;
-  background-color: #BD9100;
+  color: #BD9100;
+  background-color: #705600;
+  border-color: #705600;
 }
 
 .countdown {
@@ -123,7 +127,7 @@ span {
   width: 150px;
   height: 150px;
   color: red;
-  background-color: black;
+  background-color: #330000;
   border-color: red;
 }
 
@@ -131,7 +135,7 @@ span {
   width: 150px;
   height: 150px;
   color: #E6756B;
-  background-color: black;
+  background-color: #8f4444;
   border-color: #E6756B;
   transition-duration: 0.2s;
 }
@@ -145,7 +149,7 @@ span {
   width: 150px;
   height: 150px;
   color: yellow;
-  background-color: black;
+  background-color: #666600;
   border-color: yellow;
   transition-duration: 0.2s;
 }
@@ -159,7 +163,7 @@ span {
   width: 150px;
   height: 150px;
   color: #0C9FED;
-  background-color: black;
+  background-color: #00345c;
   border-color: #0C9FED;
   transition-duration: 0.2s;
 }
@@ -173,7 +177,7 @@ span {
   width: 150px;
   height: 150px;
   color: lime;
-  background-color: black;
+  background-color: #005c05;
   border-color: lime;
   transition-duration: 0.2s;
 }
@@ -187,7 +191,7 @@ span {
   width: 250px;
   height: 250px;
   color: cyan;
-  background-color: black;
+  background-color: #0065b3;
   border-color: cyan;
   transition-duration: 0.2s;
 }
@@ -199,7 +203,7 @@ span {
 
 .decelerateButton {
   color: #0C9FED;
-  background-color: black;
+  background-color: #00345c;
   border-color: #0C9FED;
   border-width: 4px;
   transition-duration: 0.2s;
@@ -245,7 +249,7 @@ span {
 
 .dilationButton {
   color: lime;
-  background-color: black;
+  background-color: #005c05;
   border-color: lime;
   height: 75px;
   width: 150px;
@@ -258,23 +262,24 @@ span {
 }
 
 #ehehe {
-  color: black;
+  color: #555555;
 }
 
 .generatorLocked {
-  color: red;
-  background-color: black;
+  color: black;
+  background-color: #ffa1a1;
   border-color: red;
 }
 
 .generatorUnlocked {
-  color: lime;
-  background-color: black;
+  color: black;
+  background-color: #9effae;
   border-color: lime;
   transition-duration: 0.2s;
 }
 
 .generatorUnlocked:hover {
-  color: black;
-  background-color: lime;
+  color: white;
+  background-color: green;
+  border-color: green;
 }

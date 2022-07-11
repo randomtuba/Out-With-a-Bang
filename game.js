@@ -331,6 +331,7 @@ player.challengeTimes[4] = 0
 setInterval(mainLoop, 40);
 function updateDeceleration(diff){
   if((hasEscUpgrade(6) && !player.decelerated) || hasMilestone(10)){player.deceleratePower = player.deceleratePower.add(dpps().times(diff*(player.challenge == 4 ? 100 : 1)))}else if (player.decelerated && !hasMilestone(10)){player.deceleratePower = player.deceleratePower.sub(dpps().times(diff*(player.challenge == 4 ? 100 : 1)).div(hasMilestone(1) ? 10 : 1)).max(0)}
+  if((hasEscUpgrade(6) && !player.decelerated) || hasMilestone(10)){player.totalDP = player.totalDP.add(dpps().times(diff*(player.challenge == 4 ? 100 : 1)))}
   
   if(player.deceleratePower.lte(0)) player.decelerated = false
 }
@@ -354,6 +355,9 @@ function updateHTML(maxTime){
   if(document.getElementById("decelerate")){
     document.getElementById("decelerate").innerHTML = (player.decelerated ? "Disable Decelerator" : "Enable Decelerator")
   }
+  if(document.getElementById("startGameButton")){
+    document.getElementById("startGameButton").innerHTML = (player.countdownPoints.gt(0) || player.timesEscaped > 0 ? "Begin the game again" : "Begin the game")
+  }
   if(document.getElementById("auto1") && player.currentTab == 'escape' && player.currentSubtab == 'auto') document.getElementById("auto1").innerHTML = "Red Button Autoclicker: " + (player.autobuyers[1] ? "ON" : "OFF")
   if(document.getElementById("auto2") && player.currentTab == 'escape' && player.currentSubtab == 'auto') document.getElementById("auto2").innerHTML = "Blue Button Autoclicker: " + (player.autobuyers[2] ? "ON" : "OFF")
   if(document.getElementById("auto3") && player.currentTab == 'escape' && player.currentSubtab == 'auto') document.getElementById("auto3").innerHTML = "Purple Button Autoclicker: " + (player.autobuyers[3] ? "ON" : "OFF")
@@ -363,6 +367,7 @@ function updateHTML(maxTime){
 }
 function die(maxTime){
   player.countdownPoints = player.countdownPoints.add(cpGain())
+  player.totalCP = player.totalCP.add(cpGain())
     player.gameBegun = false
     player.countdown = maxTime
     player.energy = new Decimal(0)
@@ -374,11 +379,17 @@ function die(maxTime){
     player.loreChangeDetect = false
     if(document.getElementById("countdown"))document.getElementById("countdown").style.color = "#FFFFFF"
 }
+function superGen() {
+  let gen = new Decimal(0);
+  gen = gen.add(GENERATORS[1].effect().mul(player.challenge == 4 ? 100 : 1).max(0).pow(player.dilated?0.1:1).mul(player.challenge == 3 ? 0 : 1))
+  gen = gen.add(GENERATORS[2].effect().mul(player.challenge == 4 ? 100 : 1).max(0).pow(player.dilated?0.1:1).mul(player.challenge == 3 ? 0 : 1))
+  gen = gen.add(GENERATORS[3].effect().mul(player.challenge == 4 ? 100 : 1).max(0).pow(player.dilated?0.1:1).mul(player.challenge == 3 ? 0 : 1))
+  gen = gen.add(GENERATORS[4].effect().mul(player.challenge == 4 ? 100 : 1).max(0).pow(player.dilated?0.1:1).mul(player.challenge == 3 ? 0 : 1))
+  return gen
+}
 function updateSE(diff){
-  player.superEnergy = player.superEnergy.add(GENERATORS[1].effect().mul(diff*(player.challenge == 4 ? 100 : 1)).max(0).pow(player.dilated?0.1:1)).mul(player.challenge == 3 ? 0 : 1)
-  player.superEnergy = player.superEnergy.add(GENERATORS[2].effect().mul(diff*(player.challenge == 4 ? 100 : 1)).max(0).pow(player.dilated?0.1:1)).mul(player.challenge == 3 ? 0 : 1)
-  player.superEnergy = player.superEnergy.add(GENERATORS[3].effect().mul(diff*(player.challenge == 4 ? 100 : 1)).max(0).pow(player.dilated?0.1:1)).mul(player.challenge == 3 ? 0 : 1)
-  player.superEnergy = player.superEnergy.add(GENERATORS[5].effect().mul(diff*(player.challenge == 4 ? 100 : 1)).max(0).pow(player.dilated?0.1:1)).mul(player.challenge == 3 ? 0 : 1)
+  player.superEnergy = player.superEnergy.add(superGen().mul(diff))
+  player.totalSE = player.totalSE.add(superGen().mul(diff))
   player.generators[7] = player.generators[7].add(GENERATORS[4].effect().mul(diff*(player.challenge == 4 ? 100 : 1)).max(0).pow(player.dilated?0.1:1)).mul(player.challenge == 3 ? 0 : 1)
   player.generators[8] = player.generators[8].add(GENERATORS[6].effect().mul(diff*(player.challenge == 4 ? 100 : 1)).max(0).pow(player.dilated?0.1:1)).mul(player.challenge == 3 ? 0 : 1)
   player.generators[9] = player.generators[9].add(GENERATORS[6].effect().mul(diff*(player.challenge == 4 ? 100 : 1)).max(0).pow(player.dilated?0.1:1)).mul(player.challenge == 3 ? 0 : 1)
@@ -450,7 +461,9 @@ function autobuyStuff(diff){
 
 function passiveGeneration(diff) {
   player.countdownPoints = player.countdownPoints.add(totalCPGain().mul(diff*(player.challenge == 4 ? 100 : 1)))
+  player.totalCP = player.totalCP.add(totalCPGain().mul(diff*(player.challenge == 4 ? 100 : 1)))
   player.escapePoints = player.escapePoints.add(Decimal.pow(2,player.timesEscaped+player.extraTimesEscaped).mul(diff*(player.challenge == 4 ? 100 : 1)))
+  player.totalEP = player.totalEP.add(Decimal.pow(2,player.timesEscaped+player.extraTimesEscaped).mul(diff*(player.challenge == 4 ? 100 : 1)))
 }
 const UPGRADES = {
   1: {
@@ -630,6 +643,7 @@ function upgAmt(){
 
 function escape1(){
     player.escapePoints = player.escapePoints.add(Decimal.pow(2,player.timesEscaped+player.extraTimesEscaped))
+    player.totalEP = player.totalEP.add(Decimal.pow(2,player.timesEscaped+player.extraTimesEscaped))
     if(player.timesEscaped < 8){
       player.timesEscaped++
     }else{
@@ -999,3 +1013,20 @@ function rowAmt() {
   if(player.escapeUpgrades.length >= 12) rows++
   return rows
 }
+
+document.addEventListener("keydown", function onEvent(event) {
+  switch (event.key) {
+    case "b":
+      if(!player.gameBegun) player.gameBegun = true
+    break;
+    case "e":
+      if(player.energy.gte(escapeReq())) escape1()
+    break;
+    case "d":
+      if(hasEscUpgrade(6)) player.decelerated = !player.decelerated
+    break;
+    case "i":
+      if(player.extraTimesEscaped >= 92) ε()
+    break;
+  }
+});

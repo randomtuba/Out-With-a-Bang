@@ -412,3 +412,14 @@ const MISSIONS = {
     done(){return player.spacetime[3].gte(1e30)},
   },
 }
+
+function missionAmt() {
+  let amt = 3;
+  if(player.timesEscaped > 0 || player.epsilons > 0) amt++;
+  if(player.totalDP.gt(0)) amt++;
+  if(player.totalSE.gt(0)) amt++;
+  if(player.epsilons > 0) amt++;
+  if(hasEpsUpgrade(13)) amt++;
+  if(hasEpsUpgrade(14)) amt++;
+  return amt
+}

@@ -46,6 +46,15 @@ function start() {
     dilated: false,
     dilatedTime: new Decimal(0),
     gameWon: false,
+    currentTheme: true,
+    statisticsTab: 'stats',
+    timesDecelerated: 0,
+    totalCP: new Decimal(0),
+    totalEP: new Decimal(0),
+    totalDP: new Decimal(0),
+    totalSE: new Decimal(0),
+    totalIP: new Decimal(0),
+    timesDilated: 0,
   };
   return a;
 }
@@ -90,6 +99,7 @@ function load() {
     );
     fixSave();
   }
+  document.getElementById("style").href = player.currentTheme ? "style.css" : "light.css";
   app = new Vue({
     el: "#app",
     data: {

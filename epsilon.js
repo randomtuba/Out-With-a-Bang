@@ -5,6 +5,7 @@ function ε() {
   if(player.extraTimesEscaped >= 92){
     player.epsilons++
     player.instantPoints = player.instantPoints.add(ipFormula())
+    player.totalIP = player.totalIP.add(ipFormula())
     player.energy = new Decimal(0)
     player.buttonPresses = [null,0,0,0,0,0]
     player.gameBegun = false
@@ -19,7 +20,7 @@ function ε() {
     if(player.epsilons < 2) player.purpleMult = new Decimal(1)
     if(!hasMilestone(8)) player.currentSubtab = 'upgrades'
     player.deceleratePower = new Decimal(0)
-    if(!hasMilestone(10)){player.decelerated = false}else{player.decelerated = true}
+    if(!hasMilestone(10)){player.decelerated = false}
     if(!hasMilestone(3)) player.autobuyers = [null,false,false,false,false,false,false]
     player.superEnergy = new Decimal(0)
     player.generators = [null,new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0)]
@@ -389,6 +390,7 @@ function buyCondenser(x) {
 
 function dilateTime() {
   player.dilated = !player.dilated
+  if(player.dilated) player.timesDilated++
   ε()
 }
 

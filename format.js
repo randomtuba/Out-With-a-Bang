@@ -84,6 +84,23 @@ function formatTime(s) {
     else return formatWhole(Math.floor(s / 31536000)) + " years (how?), " + formatWhole(Math.floor(s / 86400) % 365) + " days, " + formatWhole(Math.floor(s / 3600) % 24) + " hours, " + formatWhole(Math.floor(s / 60) % 60) + " minutes, and " + format(s % 60) + " seconds"
 }
 
+function formatTimeLong(s) {
+    if (s < 60) return format(s) + " seconds"
+    else if (s < 3600) return format(s / 60) + " minutes"
+    else if (s < 86400) return format(s / 3600) + " hours"
+    else if (s < 604800) return format(s / 86400) + " days"
+    else if (s < 2628000) return format(s / 604800) + " weeks"
+    else if (s < 31536000) return format(s / 2628000) + " months"
+    else if (s < 315360000) return format(s / 31536000) + " years"
+    else if (s < 3153600000) return format(s / 315360000) + " decades"
+    else if (s < 31536000000) return format(s / 3153600000) + " centuries"
+    else if (s < 3.1536e13) return format(s / 31536000000) + " millenia"
+    else if (s < 3.1536e16) return format(s / 3.1536e13) + " million years"
+    else if (s < 4.320432e17) return format(s / 3.1536e16) + " billion years"
+    else if (s < 1e100) return format(s / 4.320432e17) + " current ages of the Universe"
+    else return format(s / 1e100) + " Reality Updates"
+}
+
 function toPlaces(x, precision, maxAccepted) {
     x = new Decimal(x)
     let result = x.toStringWithDecimalPlaces(precision)
