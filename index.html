@@ -102,11 +102,14 @@
       </button>
       <button onclick="hardReset()">
         Hard Reset
+      </button><br v-if="player.gameWon && !player.newContent"><br v-if="player.gameWon && !player.newContent">
+      <button v-if="player.gameWon && !player.newContent" onclick="newContent()">
+        New Content: OFF
       </button>
       <br><br>
       Made by randomtuba#8432 for the Void Development Jam 2.0<br>Game Jam Theme: <b>Out of Time</b><br><br>
-      Use B to begin the game, Use E to Escape{{hasEscUpgrade(6) ? ", use D to Decelerate" : ''}}{{player.epsilons >= 1 ? ", use I to Epsilon" : ''}}.<br><br>
-      The Enter trick is required for certain sections of this game.<br><span style="color:red">Warning: This game contains flashing colors and UI.</span><br><br><br><br><span id="ehehe">ehehe()</span>
+      Use B to begin the game, use E to Escape{{hasEscUpgrade(6) ? ", use D to Decelerate" : ''}}{{player.epsilons >= 1 ? ", use I to Epsilon" : ''}}{{hasEpsUpgrade(3) ? ", use T to Dilate Time" : ''}}.<br><br>
+      Current Version: v1.0.2<br>The Enter trick is required for certain sections of this game.<br><span style="color:red">Warning: This game contains flashing colors and UI.</span><br><br><a href="https://discord.gg/HhcavwM5rm" target="_blank">Discord Link</a><br><br><br><br><span id="ehehe">ehehe()</span>
       </div>
     <div id="tab3disp" v-if="player.currentTab == 'stats'"> <!--- STATISTICS !--->
       <button id="subtab9" onclick="player.statisticsTab = 'stats'">Statistics</button>
@@ -116,7 +119,7 @@
         You have generated {{format(player.totalEnergy)}} energy in total.<br>
         You have bought {{player.upgrades.length}} Energy Upgrades.<br>
         You have pressed {{format(player.totalButtonPresses)}} buttons in total.<br>
-        You have bought {{formatWhole(player.buyables[1]+player.buyables[2]+player.buyables[3]+player.buyables[4]+player.buyables[5]+player.buyables[6]+player.buyables[7]+player.buyables[8]+player.buyables[9]+player.buyables[10])}} buyables in total.<br>
+        You have bought {{formatWhole(player.buyables[1]+player.buyables[2]+player.buyables[3]+player.buyables[4]+player.buyables[5]+player.buyables[6]+player.buyables[7]+player.buyables[8]+player.buyables[9]+player.buyables[10]+player.spacetime[4]+player.spacetime[5]+player.spacetime[6]+player.condensedST[4]+player.condensedST[5]+player.condensedST[6])}} buyables in total.<br>
         You have played this game for {{formatTime(player.timePlayed)}}.<br><br>
         <span v-if="player.totalCP.gt(0)">
         <b style="color: #E6756B">Countdown</b><br>
@@ -175,13 +178,13 @@
       </div>
       </div>
     <div id="tab4disp" v-if="player.currentTab == 'achs'"> <!--- MISSIONS !--->
-      You have completed {{player.achievements.length}}/81 missions. ({{format(player.achievements.length / 81 * 100)}}%)<br><br>
+      You have completed {{player.achievements.length}}/90 missions. ({{format(player.achievements.length / 90 * 100)}}%)<br><br>
       <table class="autocenter">
       <tr v-for="a in missionAmt()">
       <td v-for="b in 9">
-          <button :class="{achievementLocked:!player.achievements.includes((Number(a)*10+Number(b)).toString()),achievementCompleted:player.achievements.includes((Number(a)*10+Number(b)).toString())}" style="height: 150px; width: 150px">
-            <span><b>{{MISSIONS[a*10+b].name}}</b></span><br>
-            {{MISSIONS[a*10+b].desc}}<br>
+          <button :class="{achievementLocked:!player.achievements.includes(getMissionNumber(a,b).toString()),achievementCompleted:player.achievements.includes(getMissionNumber(a,b).toString())}" style="height: 150px; width: 150px">
+            <span><b>{{MISSIONS[getMissionNumber(a,b)].name}}</b></span><br>
+            {{MISSIONS[getMissionNumber(a,b)].desc}}<br>
           </button>
       </td>
       </tr>
@@ -193,7 +196,7 @@
       <table class="autocenter">
       <td v-for="a in 3">
           <button :class="{buyableLocked:player.countdownPoints.lt(BUYABLES[a].cost()),buyableUnlocked:player.countdownPoints.gte(BUYABLES[a].cost())}" @click="buyBuyable(a)">
-            {{BUYABLES[a].desc}}<br>
+            {{typeof BUYABLES[a].desc == "function" ? BUYABLES[a].desc() : BUYABLES[a].desc}}<br>
             Amount: {{formatWhole(player.buyables[a])}}{{a == 1 && new Decimal(player.challengeTimes[2]).lt(600) ? ' + ' + CHALLENGES[2].effect() : ''}}<br>
             Cost: {{format(BUYABLES[a].cost())}} CP<br>
             Currently: {{BUYABLES[a].effectDisplay()}}<br>
@@ -224,11 +227,11 @@
       </div>
       <div id="tab6-2disp" v-if="player.currentSubtab == 'decelerator'"> <!--- DECELERATOR !--->
         <span style="color:#0C9FED">You have {{format(player.deceleratePower)}} Deceleration Power. ({{format(dpps())}}/sec)<br>Time Speed: {{formatSmall(timeSpeed())}}x</span><br><br>Enabling the Decelerator will halt your DP generation and subtract from your DP, however you will be able to slow down the speed of the timer.<br><br>
-        <button id="decelerate" class="decelerateButton" onclick="player.decelerated = !player.decelerated; if(player.decelerated){player.timesDecelerated += 1};">{{player.decelerated ? "Disable Decelerator" : "Enable Decelerator"}}</button><br><br>
+        <button id="decelerate" class="decelerateButton" onclick="player.decelerated = !player.decelerated; if(player.decelerated){player.timesDecelerated += 1}">{{player.decelerated ? "Disable Decelerator" : "Enable Decelerator"}}</button><br><br>
         <table class="autocenter">
         <td v-for="a in 3">
           <button :class="{buyableLocked:player.deceleratePower.lt(DECEL_BUYABLES[a].cost()),decelBuyableUnlocked:player.deceleratePower.gte(DECEL_BUYABLES[a].cost())}" @click="buyDecelBuyable(a)">
-            {{DECEL_BUYABLES[a].desc}}<br>
+            {{typeof DECEL_BUYABLES[a].desc == "function" ? DECEL_BUYABLES[a].desc() : DECEL_BUYABLES[a].desc}}<br>
             Amount: {{formatWhole(player.buyables[a+4])}}<br>
             Cost: {{format(DECEL_BUYABLES[a].cost())}} DP<br>
             Currently: {{DECEL_BUYABLES[a].effectDisplay()}}<br>
@@ -329,6 +332,11 @@
         You have <span style="color: orange; font-size: 20px;">{{format(player.spacetime[1])}}</span> space. (generated based on CP) ({{format(player.countdownPoints.max(0).pow(0.0025).add(1).mul(CONDENSERS[1].effect()).mul(spacetimeMults()))}}/sec)<br>
         You have <span style="color: #008a27; font-size: 20px;">{{format(player.spacetime[2])}}</span> time. (generated based on DP) ({{format(player.deceleratePower.max(0).pow(0.02).add(1).mul(CONDENSERS[2].effect()).mul(spacetimeMults()))}}/sec)<br>
         You have <span style="color: cyan; font-size: 20px;">{{format(player.spacetime[3])}}</span> spacetime. (generated based on space and time) ({{format(player.spacetime[1].mul(player.spacetime[2]).pow(0.25).mul(CONDENSERS[3].effect()).mul(spacetimeMults()))}}/sec)<br><br>
+        <span id="condensed" v-if="player.newContent">
+           You have <span style="color: #915200; font-size: 20px;">{{format(player.condensedST[1])}}</span> condensed space. (generated based on space) ({{format(player.spacetime[1].div(1e30).pow(0.3).mul(CONDENSERS_2[1].effect()))}}/sec)<br>
+        You have <span style="color: #3c5c3b; font-size: 20px;">{{format(player.condensedST[2])}}</span> condensed time. (generated based on time) ({{format(player.spacetime[2].div(1e32).pow(0.3).mul(CONDENSERS_2[2].effect()))}}/sec)<br>
+        You have <span style="color: teal; font-size: 20px;">{{format(player.condensedST[3])}}</span> condensed spacetime. (generated based on spacetime) ({{format(player.spacetime[3].div(1e45).pow(0.3).mul(CONDENSERS_2[3].effect()))}}/sec)<br><br>
+        </span>
         <table class="autocenter">
         <td v-for="a in 3">
           <button style="height: 250px; width: 250px;" :class="{buyableLocked:player.spacetime[a].lt(CONDENSERS[a].cost()),condenserUnlocked:player.spacetime[a].gte(CONDENSERS[a].cost())}" @click="buyCondenser(a)">
@@ -340,10 +348,21 @@
           </button>
         </td>
         </table><br>
+        <table class="autocenter">
+        <td v-for="a in 3" v-if="player.newContent">
+          <button style="height: 250px; width: 250px;" :class="{buyableLocked:player.condensedST[a].lt(CONDENSERS_2[a].cost()),condenserUnlocked2:player.condensedST[a].gte(CONDENSERS_2[a].cost())}" @click="buyCondenser2(a)">
+            <span><b>{{CONDENSERS_2[a].title}}</b></span><br>
+            {{CONDENSERS_2[a].desc}}<br>
+            Amount: {{formatWhole(player.condensedST[a+3])}}<br>
+            Cost: {{format(CONDENSERS_2[a].cost())}} {{a == 1 ? 'condensed space' : (a == 2 ? 'condensed time' : 'condensed spacetime')}}<br>
+            Currently: {{CONDENSERS_2[a].effectDisplay()}}<br>
+          </button>
+        </td>
+        </table><br>
         <div id="timeDilation" v-if="hasEpsUpgrade(3)">
-          You have <span style="color: lime; font-size: 20px;">{{format(player.dilatedTime)}}</span> dilated time, multiplying production of the previous currencies by {{format(dtEffect())}}x and dividing Time Speed by its amount.<br>You are getting {{format(player.dilated ? Decimal.pow(2,player.extraTimesEscaped-92) : 0)}} Dilated Time per second.<br>
-          <span style="color: lime">Dilating time raises your energy gain to the 0.6th and raises the rest of your pre-Epsilon currencies (excluding EP) to the 0.1st.</span><br>
-          <span style="color: lime">You can gain Dilated Time within Dilation if you have at least 100 Escapes.</span><br><br>
+          You have <span style="color: #ceff46; font-size: 20px;">{{format(player.dilatedTime)}}</span> dilated time, multiplying production of the previous currencies by {{format(dtEffect())}}x and dividing Time Speed by {{player.newContent ? format(player.dilatedTime.add(1).pow(1.5)) : "its amount"}}.<br>You are getting {{format(player.dilated ? Decimal.pow(2,player.extraTimesEscaped-92) : 0)}} Dilated Time per second.<br>
+          <span style="color: #ceff46">Dilating time raises your energy gain to the 0.6th and raises the rest of your pre-Epsilon currencies (excluding EP) to the 0.1st.</span><br>
+          <span style="color: #ceff46">You can gain Dilated Time within Dilation if you have at least 100 Escapes.</span><br><br>
           <button class="dilationButton" onclick="dilateTime()">
             {{player.dilated ? "Stop dilation." : "Dilate time."}}
           </button>

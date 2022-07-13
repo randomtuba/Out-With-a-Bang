@@ -3,11 +3,16 @@ function ipFormula() {
 }
 function ε() {
   if(player.extraTimesEscaped >= 92){
+    if(player.buyables[5]==0&&player.buyables[6]==0&&player.buyables[7]==0&&!player.achievements.includes("105")){player.achievements.push("105")}
+    if(player.superEnergy.eq(0)&&!player.achievements.includes("106")){player.achievements.push("106")}
+    if(player.superEnergy.eq(0)&&player.buyables[5]==0&&player.buyables[6]==0&&player.buyables[7]==0&&!player.achievements.includes("107")){player.achievements.push("107")}
+    if(player.buyables[1]==0&&player.buyables[2]==0&&player.buyables[3]==0&&!player.achievements.includes("108")){player.achievements.push("108")}
+    if(player.buyables[11]==0&&player.buyables[8]==0&&player.buyables[9]==0&&player.buyables[10]==0&&player.buyables[5]==0&&player.buyables[6]==0&&player.buyables[7]==0&&player.buyables[4]==0&&player.buyables[1]==0&&player.buyables[2]==0&&player.buyables[3]==0&&!player.achievements.includes("109")){player.achievements.push("109")}
     player.epsilons++
     player.instantPoints = player.instantPoints.add(ipFormula())
     player.totalIP = player.totalIP.add(ipFormula())
     player.energy = new Decimal(0)
-    player.buttonPresses = [null,0,0,0,0,0]
+    player.buttonPresses = [null,new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0)]
     player.gameBegun = false
     if(!hasMilestone(3)) player.upgrades = []
     player.countdownPoints = new Decimal(0)
@@ -24,7 +29,8 @@ function ε() {
     if(!hasMilestone(3)) player.autobuyers = [null,false,false,false,false,false,false]
     player.superEnergy = new Decimal(0)
     player.generators = [null,new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0)]
-    player.countdown = 120*(0.75**(player.timesEscaped+player.extraTimesEscaped))
+    player.countdown = new Decimal(120).mul(Decimal.pow(0.75,player.timesEscaped+player.extraTimesEscaped))
+    player.hasDecelerated = false;
   }
 }
 
@@ -137,7 +143,7 @@ const EPS_UPGRADES = {
     title: "Blast Resistance",
     desc: "Gain more CP based on your starting timer.",
     cost: new Decimal(1),
-    effect() {return Decimal.div(1,new Decimal(120*(0.75**(player.timesEscaped+player.extraTimesEscaped))).max(0)).pow(0.5).add(1)},
+    effect() {return Decimal.div(1,new Decimal(120).mul(Decimal.pow(0.75,(player.timesEscaped+player.extraTimesEscaped)))).max(0).pow(0.5).add(1)},
     effectDisplay() {return format(EPS_UPGRADES[7].effect()) + "x CP gain"},
   },
   8: {
@@ -338,10 +344,10 @@ const CONDENSERS = {
       return new Decimal(100).mul(Decimal.pow(100,player.spacetime[4]))
     },
     effect() {
-      return Decimal.pow(3,player.spacetime[4])
+      return Decimal.pow(3,player.spacetime[4]+(2*player.condensedST[4]))
     },
     effect2() {
-      return Decimal.pow(1e30,player.spacetime[4])
+      return Decimal.pow(1e30,player.spacetime[4]+(2*player.condensedST[4]))
     },
     effectDisplay() {
       return format(CONDENSERS[1].effect()) + "x space gain, " + format(CONDENSERS[1].effect2()) + "x super-energy gain";
@@ -354,29 +360,71 @@ const CONDENSERS = {
       return new Decimal(100).mul(Decimal.pow(100,player.spacetime[5]))
     },
     effect() {
-      return Decimal.pow(3,player.spacetime[5])
+      return Decimal.pow(3,player.spacetime[5]+(2*player.condensedST[5]))
     },
     effect2() {
-      return Decimal.pow(100,player.spacetime[5])
+      return Decimal.pow(100,player.spacetime[5]+(2*player.condensedST[5]))
     },
     effectDisplay() {
       return format(CONDENSERS[2].effect()) + "x time gain, " + format(CONDENSERS[2].effect2()) + "x Decelerator Buyable 3 base";
     },
   },
   3: {
-    title: "Time Condenser",
+    title: "Spacetime Condenser",
     desc: "Quadruple spacetime gain and multiply IP gain by 1,000 per purchase",
     cost() {
       return new Decimal(1000).mul(Decimal.pow(1000,player.spacetime[6]))
     },
     effect() {
-      return Decimal.pow(4,player.spacetime[6])
+      return Decimal.pow(4,player.spacetime[6]+(2*player.condensedST[6]))
     },
     effect2() {
-      return Decimal.pow(1000,player.spacetime[6])
+      return Decimal.pow(1000,player.spacetime[6]+(2*player.condensedST[6]))
     },
     effectDisplay() {
       return format(CONDENSERS[3].effect()) + "x spacetime gain, " + format(CONDENSERS[3].effect2()) + "x IP gain";
+    },
+  },
+}
+
+const CONDENSERS_2 = {
+  1: {
+    title: "Space Condenser^2",
+    desc: "Multiply condensed space gain by 1.5 and add 2 free levels to the above Condenser",
+    cost() {
+      return new Decimal(1000).mul(Decimal.pow(1000,player.condensedST[4]))
+    },
+    effect() {
+      return Decimal.pow(1.5,player.condensedST[4])
+    },
+    effectDisplay() {
+      return format(CONDENSERS_2[1].effect()) + "x condensed space gain, +" + format(2*player.condensedST[4]) + " Space Condenser levels";
+    },
+  },
+  2: {
+    title: "Time Condenser^2",
+    desc: "Multiply condensed time gain by 1.5 and add 2 free levels to the above Condenser",
+    cost() {
+      return new Decimal(1000).mul(Decimal.pow(1000,player.condensedST[5]))
+    },
+    effect() {
+      return Decimal.pow(1.5,player.condensedST[5])
+    },
+    effectDisplay() {
+      return format(CONDENSERS_2[2].effect()) + "x condensed time gain, +" + format(2*player.condensedST[5]) + " Time Condenser levels";
+    },
+  },
+  3: {
+    title: "Spacetime Condenser^2",
+    desc: "Double condensed spacetime gain and add 2 free levels to the above Condenser",
+    cost() {
+      return new Decimal(10000).mul(Decimal.pow(100000,player.condensedST[6]))
+    },
+    effect() {
+      return Decimal.pow(2,player.condensedST[6])
+    },
+    effectDisplay() {
+      return format(CONDENSERS_2[3].effect()) + "x condensed spacetime gain, +" + format(2*player.condensedST[6]) + " Spacetime Condenser levels";
     },
   },
 }
@@ -388,6 +436,13 @@ function buyCondenser(x) {
   }
 }
 
+function buyCondenser2(x) {
+  if(player.condensedST[x].gte(CONDENSERS_2[x].cost())){
+    player.condensedST[x] = player.condensedST[x].sub(CONDENSERS_2[x].cost())
+    player.condensedST[x+3] += 1
+  }
+}
+
 function dilateTime() {
   player.dilated = !player.dilated
   if(player.dilated) player.timesDilated++
@@ -396,4 +451,14 @@ function dilateTime() {
 
 function dtEffect() {
   return player.dilatedTime.max(0).pow(0.5).add(1)
+}
+
+function newContent() {
+  if (
+    confirm(
+      "Toggling this option will unlock new content that is not part of the game jam version. This cannot be undone! Are you sure you want to do this?"
+    )
+  ) {
+    player.newContent = true
+  }
 }

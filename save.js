@@ -5,10 +5,10 @@ function start() {
     energy: new Decimal(0),
     totalEnergy: new Decimal(0),
     buttonPresses: [
-      null,0,0,0,0,0,
+      null,new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0)
     ],
     currentTab: 'dashboard',
-    countdown: 120,
+    countdown: new Decimal(120),
     gameBegun: false,
     upgrades: [],
     countdownPoints: new Decimal(0),
@@ -18,7 +18,7 @@ function start() {
     timesEscaped: 0,
     extraTimesEscaped: 0,
     escapeUpgrades: [],
-    totalButtonPresses: 0,
+    totalButtonPresses: new Decimal(0),
     loreChangeDetect: false,
     buyables: [null,0,0,0,0,0,0,0,0,0,0,0],
     purpleMult: new Decimal(1),
@@ -55,6 +55,10 @@ function start() {
     totalSE: new Decimal(0),
     totalIP: new Decimal(0),
     timesDilated: 0,
+    lastTick: Date.now(),
+    newContent: false,
+    condensedST: [null,new Decimal(0),new Decimal(0),new Decimal(0),0,0,0],
+    hasDecelerated: false,
   };
   return a;
 }
@@ -116,6 +120,7 @@ setInterval(function () {
 }, 5000);
 window.onload = function () {
   load();
+  mainLoop(1)
 };
 
 function exportSave() {

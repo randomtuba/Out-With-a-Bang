@@ -99,47 +99,47 @@ const MISSIONS = {
   31: {
     name: "Button intern",
     desc: "Press 100 buttons in total",
-    done(){return player.totalButtonPresses>=100},
+    done(){return player.totalButtonPresses.gte(100)},
   },
   32: {
     name: "Avid presser",
     desc: "Press 1,000 buttons in total",
-    done(){return player.totalButtonPresses>=1000},
+    done(){return player.totalButtonPresses.gte(1000)},
   },
   33: {
     name: "Button manager",
     desc: "Press 10,000 buttons in total",
-    done(){return player.totalButtonPresses>=1e4},
+    done(){return player.totalButtonPresses.gte(1e4)},
   },
   34: {
     name: "The Button Boss",
     desc: "Press 1,000,000 buttons in total",
-    done(){return player.totalButtonPresses>=1e6},
+    done(){return player.totalButtonPresses.gte(1e6)},
   },
   35: {
     name: "Arthritis",
     desc: "Press 1e9 buttons in total",
-    done(){return player.totalButtonPresses>=1e9},
+    done(){return player.totalButtonPresses.gte(1e9)},
   },
   36: {
     name: "Hehe I like pressing things",
     desc: "Press 1e15 buttons in total",
-    done(){return player.totalButtonPresses>=1e15},
+    done(){return player.totalButtonPresses.gte(1e15)},
   },
   37: {
     name: "Button heaven",
     desc: "Press 1e30 buttons in total",
-    done(){return player.totalButtonPresses>=1e30},
+    done(){return player.totalButtonPresses.gte(1e30)},
   },
   38: {
     name: "The God of Buttons",
     desc: "Press 1e60 buttons in total",
-    done(){return player.totalButtonPresses>=1e60},
+    done(){return player.totalButtonPresses.gte(1e60)},
   },
   39: {
     name: "Go touch grass",
     desc: "Press 1e200 buttons in total",
-    done(){return player.totalButtonPresses>=1e200},
+    done(){return player.totalButtonPresses.gte(1e200)},
   },
   41: {
     name: "Finally!",
@@ -411,6 +411,51 @@ const MISSIONS = {
     desc: "Reach 1e30 spacetime.",
     done(){return player.spacetime[3].gte(1e30)},
   },
+  101: {
+    name: "Zero Deaths",
+    desc: "Beat Escape 3 without Countdown Buyables.",
+    done(){return false},
+  },
+  102: {
+    name: "Strict Diet",
+    desc: "Reach 1e25 Energy with only Energy Upgrade 1 and without the Energy Buyable.",
+    done(){return player.upgrades.length==1&&player.buyables[4]==0},
+  },
+  103: {
+    name: "Slow and steady",
+    desc: "Reach 100 Escapes while not Decelerated.",
+    done(){return !player.hasDecelerated&&player.extraTimesEscaped>=92},
+  },
+  104: {
+    name: "Generators Not Found",
+    desc: "Reach 1e200 Super-Energy with only 1 Generator 1.",
+    done(){return player.superEnergy.gte(1e200)&&(player.generators[1].lte(1)&&player.generators[2].eq(0)&&player.generators[3].eq(0)&&player.generators[4].eq(0)&&player.generators[5].eq(0)&&player.generators[6].eq(0))},
+  },
+  105: {
+    name: "Who needs them anyway?",
+    desc: "Epsilon without Decelerator Buyables.",
+    done(){return false},
+  },
+  106: {
+    name: "Anti-Boost",
+    desc: "Epsilon without Super-Energy.",
+    done(){return false},
+  },
+  107: {
+    name: "Double nerf",
+    desc: "Epsilon without Super-Energy and Decelerator Buyables.",
+    done(){return false},
+  },
+  108: {
+    name: "Death doesn't matter",
+    desc: "Epsilon without Countdown Buyables.",
+    done(){return false},
+  },
+  109: {
+    name: "Hardcore",
+    desc: "Epsilon without any buyables.",
+    done(){return false},
+  },
 }
 
 function missionAmt() {
@@ -418,8 +463,14 @@ function missionAmt() {
   if(player.timesEscaped > 0 || player.epsilons > 0) amt++;
   if(player.totalDP.gt(0)) amt++;
   if(player.totalSE.gt(0)) amt++;
-  if(player.epsilons > 0) amt++;
+  if(player.epsilons > 0) amt+=2;
   if(hasEpsUpgrade(13)) amt++;
   if(hasEpsUpgrade(14)) amt++;
   return amt
+}
+function getMissionNumber(row, col){
+  if(row<=7)return Number(row)*10+Number(col)
+  if(row==8)return 100+Number(col)
+  if(row==9)return 80+Number(col)
+  if(row==10)return 90+Number(col)
 }

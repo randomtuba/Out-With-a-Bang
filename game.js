@@ -90,20 +90,20 @@ function energyBuyableCost() {
 
 function timeSpeed() {
   if(hasEscUpgrade(12)){
-    let tspeed = player.decelerated ? Decimal.div(1,player.deceleratePower.max(1).log(DECEL_BUYABLES[2].effect()).add(1).mul(player.buyables[6]**2)).toNumber() : 1
-    if(player.buyables[10] >= 2 && player.decelerated) tspeed = tspeed / seMult(3)
-    if(hasEscUpgrade(14) && player.decelerated) tspeed = tspeed / ESC_UPGRADES[14].effect()
-    if(hasEpsUpgrade(15) && player.decelerated) tspeed = tspeed / EPS_UPGRADES[15].effect2()
-    if(hasEpsUpgrade(4) && player.decelerated) tspeed = tspeed / 1e50
-    if(player.decelerated) tspeed = new Decimal(tspeed).div(player.dilatedTime.add(1)).toNumber()
+    let tspeed = player.decelerated ? Decimal.div(1,player.deceleratePower.max(1).log(DECEL_BUYABLES[2].effect()).add(1).mul(player.buyables[6]**2).max(1)) : new Decimal(1)
+    if(player.buyables[10] >= 2 && player.decelerated) tspeed = tspeed.div(seMult(3))
+    if(hasEscUpgrade(14) && player.decelerated) tspeed = tspeed.div(ESC_UPGRADES[14].effect())
+    if(hasEpsUpgrade(15) && player.decelerated) tspeed = tspeed.div(EPS_UPGRADES[15].effect2())
+    if(hasEpsUpgrade(4) && player.decelerated) tspeed = tspeed.div(1e50)
+    if(player.decelerated) tspeed = new Decimal(tspeed).div(player.dilatedTime.add(1).pow(player.newContent?1.5:1))
     return tspeed
   }else{
-    let tspeed = player.decelerated ? Decimal.div(1,player.deceleratePower.max(1).log(DECEL_BUYABLES[2].effect()).add(1)).toNumber() : 1
-    if(player.buyables[10] >= 2 && player.decelerated) tspeed = tspeed / seMult(3)
-    if(hasEscUpgrade(14) && player.decelerated) tspeed = tspeed / ESC_UPGRADES[14].effect()
-    if(hasEpsUpgrade(15) && player.decelerated) tspeed = tspeed / EPS_UPGRADES[15].effect2()
-    if(hasEpsUpgrade(4) && player.decelerated) tspeed = tspeed / 1e50
-    if(player.decelerated) tspeed = new Decimal(tspeed).div(player.dilatedTime.add(1)).toNumber()
+    let tspeed = player.decelerated ? Decimal.div(1,player.deceleratePower.max(1).log(DECEL_BUYABLES[2].effect()).add(1).max(1)) : new Decimal(1)
+    if(player.buyables[10] >= 2 && player.decelerated) tspeed = tspeed.div(seMult(3))
+    if(hasEscUpgrade(14) && player.decelerated) tspeed = tspeed.div(ESC_UPGRADES[14].effect())
+    if(hasEpsUpgrade(15) && player.decelerated) tspeed = tspeed.div(EPS_UPGRADES[15].effect2())
+    if(hasEpsUpgrade(4) && player.decelerated) tspeed = tspeed.div(1e50)
+    if(player.decelerated) tspeed = new Decimal(tspeed).div(player.dilatedTime.add(1).pow(player.newContent?1.5:1))
     return tspeed
   }
 }
@@ -244,8 +244,8 @@ function buttonPress(x) {
       player.code = player.code + "5"
     break;
   }
-  player.buttonPresses[x] += BUYABLES[2].effect() ** (player.dilated?0.1:1);
-  player.totalButtonPresses += BUYABLES[2].effect() ** (player.dilated?0.1:1);
+  player.buttonPresses[x] = new Decimal(player.buttonPresses[x]).add(BUYABLES[2].effect().pow(player.dilated?0.1:1));
+  player.totalButtonPresses =player.totalButtonPresses.add(BUYABLES[2].effect().pow(player.dilated?0.1:1));
 }
 
 function buttonEffect(x) {
@@ -272,18 +272,22 @@ function rgb(r,g,b){
   return "#"+((r<16?"0":"")+r.toString(16)+(g<16?"0":"")+g.toString(16)+(b<16?"0":"")+b.toString(16))
 }
 
-function mainLoop(){
+function mainLoop(d=0){
   if(!window["player"]||!player.energy)return;
   
   let time = Date.now()
   let diff = (time-tmp.lastTick)/1000
+  if(d!=0){
+    diff = (Date.now()-player.lastTick)/1000
+  }
   tmp.lastTick = time
+  player.lastTick=time
   if(!hasEpsUpgrade(1) || player.gameWon) player.timePlayed += diff*(player.challenge == 4 ? 100 : 1)
   if(player.challenge != 0 && player.extraTimesEscaped < 92) player.timeInChallenge += diff*(player.challenge == 4 ? 100 : 1)
   if(player.gameBegun) player.energy = player.energy.add(eps().times(diff*(player.challenge == 4 ? 100 : 1)));
   if(player.gameBegun) player.totalEnergy = player.totalEnergy.add(eps().times(diff*(player.challenge == 4 ? 100 : 1)));
-  if(player.gameBegun) player.countdown = player.countdown - (diff*(player.challenge == 4 ? 100 : 1) * timeSpeed());
-  let maxTime = 120*(0.75**(player.timesEscaped+player.extraTimesEscaped))
+  if(player.gameBegun) player.countdown = player.countdown.sub( timeSpeed().mul(diff*(player.challenge == 4 ? 100 : 1)));
+  let maxTime = new Decimal(120).mul(Decimal.pow(0.75,player.timesEscaped+player.extraTimesEscaped))
   player.cooldown = player.cooldown.sub(diff*(player.challenge == 4 ? 100 : 1)).max(0)
   if(player.code.length >= 3 && player.codeState <3){
     if(player.code === "524"){
@@ -296,7 +300,7 @@ function mainLoop(){
       setTimeout(()=>{player.codeState=0}, 1000)
     }
   }
-  if(player.countdown < 0&&player.gameBegun){
+  if(player.countdown.lt(0)&&player.gameBegun){
     die(maxTime)
   }
   if(hasChalMilestone(6)){
@@ -334,14 +338,15 @@ function updateDeceleration(diff){
   if((hasEscUpgrade(6) && !player.decelerated) || hasMilestone(10)){player.totalDP = player.totalDP.add(dpps().times(diff*(player.challenge == 4 ? 100 : 1)))}
   
   if(player.deceleratePower.lte(0)) player.decelerated = false
+  if(player.decelerated) player.hasDecelerated = true
 }
 function updateHTML(maxTime){
   if(player.gameBegun){
     if(!player.antiEpilepsy){
       if(player.decelerated){
-        if(document.getElementById("countdown"))document.getElementById("countdown").style.color = rgb(Math.floor((player.countdown/maxTime)*255),Math.floor((player.countdown/maxTime)*255),255)
+        if(document.getElementById("countdown"))document.getElementById("countdown").style.color = rgb(Math.floor(Number(player.countdown.div(maxTime))*255),Math.floor(Number(player.countdown.div(maxTime))*255),255)
       }else{
-        if(document.getElementById("countdown"))document.getElementById("countdown").style.color = rgb(255,Math.floor((player.countdown/maxTime)*255),Math.floor((player.countdown/maxTime)*255))
+        if(document.getElementById("countdown"))document.getElementById("countdown").style.color = rgb(255,Math.floor(Number(player.countdown.div(maxTime))*255),Math.floor(Number(player.countdown.div(maxTime))*255))
       }
     }else{
       if(document.getElementById("countdown"))document.getElementById("countdown").style.color = "#E6756B"
@@ -369,10 +374,10 @@ function die(maxTime){
   player.countdownPoints = player.countdownPoints.add(cpGain())
   player.totalCP = player.totalCP.add(cpGain())
     player.gameBegun = false
-    player.countdown = maxTime
+    player.countdown = new Decimal(maxTime)
     player.energy = new Decimal(0)
     if(!hasEscUpgrade(8) && !hasMilestone(3)) player.upgrades = []
-    player.buttonPresses = [null,0,0,0,0,0]
+    player.buttonPresses = [null,new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0)]
     player.timesDied += 1
     if(!hasMilestone(1)) player.purpleMult = new Decimal(1)
     player.buyables[4] = 0
@@ -404,6 +409,11 @@ function updateST(diff){
   player.spacetime[1] = player.spacetime[1].add(player.countdownPoints.max(0).pow(0.0025).add(1).mul(CONDENSERS[1].effect()).mul(spacetimeMults()).mul(diff))
   player.spacetime[2] = player.spacetime[2].add(player.deceleratePower.max(0).pow(0.02).add(1).mul(CONDENSERS[2].effect()).mul(spacetimeMults()).mul(diff))
   player.spacetime[3] = player.spacetime[3].add(player.spacetime[1].mul(player.spacetime[2]).pow(0.25).mul(CONDENSERS[3].effect()).mul(spacetimeMults()).mul(diff))
+  if(player.newContent){
+    player.condensedST[1] = player.condensedST[1].add(player.spacetime[1].div(1e30).pow(0.3).mul(CONDENSERS_2[1].effect()).mul(diff))
+    player.condensedST[2] = player.condensedST[2].add(player.spacetime[2].div(1e32).pow(0.3).mul(CONDENSERS_2[2].effect()).mul(diff))
+    player.condensedST[3] = player.condensedST[3].add(player.spacetime[3].div(1e45).pow(0.3).mul(CONDENSERS_2[3].effect()).mul(diff))
+  }
 }
 
 function autobuyStuff(diff){
@@ -633,10 +643,10 @@ function upgAmt(){
     break;
   }
   let amt = 0
-  if(player.buttonPresses[buttonType] >= 5) amt++
-  if(player.buttonPresses[buttonType] >= 10) amt += 2
-  if(player.buttonPresses[buttonType] >= 25) amt += 2
-  if(player.buttonPresses[buttonType] >= 50 && player.timesEscaped >= 3) amt += 2
+  if(player.buttonPresses[buttonType].gte(5)) amt++
+  if(player.buttonPresses[buttonType].gte(10)) amt += 2
+  if(player.buttonPresses[buttonType].gte(25)) amt += 2
+  if(player.buttonPresses[buttonType].gte(50) && player.timesEscaped >= 3) amt += 2
   if(player.codeState === 3 && player.timesEscaped >= 8) amt++
   return amt
 }
@@ -649,12 +659,13 @@ function escape1(){
     }else{
       player.extraTimesEscaped++
     }
+    if(player.timesEscaped>=3&&player.buyables[1]==0&&player.buyables[2]==0&&player.buyables[3]==0&&!player.achievements.includes("101")){player.achievements.push("101")}
     player.gameBegun = false
-    player.countdown = 120*(0.75**(player.timesEscaped+player.extraTimesEscaped))
+    player.countdown = new Decimal(120).mul(Decimal.pow(0.75,player.timesEscaped+player.extraTimesEscaped))
     if(!hasMilestone(11)){
       player.energy = new Decimal(0)
       if(!hasEscUpgrade(8) && !hasMilestone(3)) player.upgrades = []
-      player.buttonPresses = [null,0,0,0,0,0]
+      player.buttonPresses = [null,new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0)]
       if(!hasMilestone(1)) player.purpleMult = new Decimal(1)
       player.buyables[4] = 0
     }
@@ -664,9 +675,12 @@ function escape1(){
 
 const BUYABLES = {
   1: {
-    desc: "Triple energy gain per purchase",
+    desc(){return "Multiply energy gain per purchase by "+format(this.base())},
     cost() {
       return player.buyables[1] >= 10 ? new Decimal(2048).mul(Decimal.pow(2,(player.buyables[1]-10)**1.5)).div(hasEpsUpgrade(2)?EPS_UPGRADES[2].effect():1) : new Decimal(2).mul(Decimal.pow(2,player.buyables[1])).div(hasEpsUpgrade(2)?EPS_UPGRADES[2].effect():1)
+    },
+    base(){
+      return player.challenge == 2 ? new Decimal(1) : hasEscUpgrade(5) ? new Decimal(3).add(ESC_UPGRADES[5].effect()) : 3
     },
     effect() {
       return player.challenge == 2 ? new Decimal(1) : Decimal.pow(hasEscUpgrade(5) ? new Decimal(3).add(ESC_UPGRADES[5].effect()) : 3,player.buyables[1] + CHALLENGES[2].effect())
@@ -681,7 +695,7 @@ const BUYABLES = {
       return new Decimal(2).mul(Decimal.pow(3,player.buyables[2]))
     },
     effect() {
-      return player.challenge == 2 ? 1 : new Decimal(2).pow(player.buyables[2]).min(1e300).toNumber()
+      return player.challenge == 2 ? new Decimal(1) : new Decimal(2).pow(player.buyables[2])
     },
     effectDisplay() {
       return format(BUYABLES[2].effect()) + "x button presses";
@@ -727,7 +741,8 @@ const DECEL_BUYABLES = {
     },
   },
   3: {
-    desc: "Multiply energy gain by 10 per purchase",
+    desc(){return "Multiply energy gain per purchase by "+format(this.base(),0)},
+    base(){return new Decimal(10).mul(CONDENSERS[2].effect2())},
     cost() {
       return new Decimal(1000).mul(Decimal.pow(10,player.buyables[7]))
     },
@@ -1028,5 +1043,10 @@ document.addEventListener("keydown", function onEvent(event) {
     case "i":
       if(player.extraTimesEscaped >= 92) ε()
     break;
+    case "t":
+      if(hasEpsUpgrade(3)) dilateTime()
+    break;
   }
 });
+
+if(Math.random()<0.01)document.title="Out With No Bitches"

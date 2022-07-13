@@ -248,9 +248,9 @@ span {
 }
 
 .dilationButton {
-  color: lime;
+  color: #ceff46;
   background-color: #005c05;
-  border-color: lime;
+  border-color: #ceff46;
   height: 75px;
   width: 150px;
   transition-duration: 0.5s;
@@ -258,7 +258,7 @@ span {
 
 .dilationButton:hover {
   color: black;
-  background-color: lime;
+  background-color: #ceff46;
 }
 
 #ehehe {
