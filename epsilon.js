@@ -253,7 +253,7 @@ function enterChallenge(x) {
   player.challenge = x
   player.timeInChallenge = 0
   player.energy = new Decimal(0)
-  player.buttonPresses = [null,0,0,0,0,0]
+  player.buttonPresses = [null,new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0)]
   player.gameBegun = false
   if(!hasChalMilestone(3)) player.upgrades = []
   player.countdownPoints = new Decimal(0)
