@@ -1,14 +1,14 @@
 function ipFormula() {
   return player.extraTimesEscaped >= 92 ? Decimal.pow((1.05+(hasEpsUpgrade(12)?0.02:0)),player.extraTimesEscaped-92).mul(CONDENSERS[3].effect2()).floor() : new Decimal(0)
 }
-function ε() {
-  if(player.extraTimesEscaped >= 92){
+function ε(force=false) {
+  if(player.extraTimesEscaped >= 92 || force){
     if(player.buyables[5]==0&&player.buyables[6]==0&&player.buyables[7]==0&&!player.achievements.includes("105")){player.achievements.push("105")}
     if(player.superEnergy.eq(0)&&!player.achievements.includes("106")){player.achievements.push("106")}
     if(player.superEnergy.eq(0)&&player.buyables[5]==0&&player.buyables[6]==0&&player.buyables[7]==0&&!player.achievements.includes("107")){player.achievements.push("107")}
     if(player.buyables[1]==0&&player.buyables[2]==0&&player.buyables[3]==0&&!player.achievements.includes("108")){player.achievements.push("108")}
     if(player.buyables[11]==0&&player.buyables[8]==0&&player.buyables[9]==0&&player.buyables[10]==0&&player.buyables[5]==0&&player.buyables[6]==0&&player.buyables[7]==0&&player.buyables[4]==0&&player.buyables[1]==0&&player.buyables[2]==0&&player.buyables[3]==0&&!player.achievements.includes("109")){player.achievements.push("109")}
-    player.epsilons++
+    if(!force)player.epsilons++
     player.instantPoints = player.instantPoints.add(ipFormula())
     player.totalIP = player.totalIP.add(ipFormula())
     player.energy = new Decimal(0)
@@ -31,6 +31,7 @@ function ε() {
     player.generators = [null,new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0)]
     player.countdown = new Decimal(120).mul(Decimal.pow(0.75,player.timesEscaped+player.extraTimesEscaped))
     player.hasDecelerated = false;
+    
   }
 }
 
@@ -446,7 +447,7 @@ function buyCondenser2(x) {
 function dilateTime() {
   player.dilated = !player.dilated
   if(player.dilated) player.timesDilated++
-  ε()
+  ε(true)
 }
 
 function dtEffect() {
