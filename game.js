@@ -908,7 +908,7 @@ const ESC_UPGRADES = {
     title: "Planck Time",
     desc: "Time Speed while Decelerated is divided based on your unspent EP.",
     cost: new Decimal(6e19),
-    effect() {return player.escapePoints.max(0).pow(0.25).add(1).toNumber()},
+    effect() {return player.escapePoints.max(0).pow(0.25).add(1)},
     effectDisplay() {return "/" + format(ESC_UPGRADES[14].effect()) + " Time Speed"},
   },
   15: {
