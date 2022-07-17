@@ -271,7 +271,7 @@ function enterChallenge(x) {
   if(!hasMilestone(3)) player.autobuyers = [null,false,false,false,false,false,false]
   player.superEnergy = new Decimal(0)
   player.generators = [null,new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0),new Decimal(0)]
-  player.countdown = 120*(0.75**(player.timesEscaped+player.extraTimesEscaped))
+  player.countdown = new Decimal(120).mul(Decimal.pow(0.75,player.timesEscaped+player.extraTimesEscaped))
   player.epsilonAutobuyers = [null,false,false,false,false]
   if(hasChalMilestone(1)) player.epsilonAutobuyers[1] = true
   if(hasChalMilestone(2)) player.epsilonAutobuyers[2] = true

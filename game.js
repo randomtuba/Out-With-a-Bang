@@ -289,7 +289,7 @@ function mainLoop(d=0){
   if(player.gameBegun) player.countdown = player.countdown.sub( timeSpeed().mul(diff*(player.challenge == 4 ? 100 : 1)));
   let maxTime = new Decimal(120).mul(Decimal.pow(0.75,player.timesEscaped+player.extraTimesEscaped))
   player.cooldown = player.cooldown.sub(diff*(player.challenge == 4 ? 100 : 1)).max(0)
-  if(player.code.length >= 3 && player.codeState <3){
+  if(player.code.length >= 3 && player.codeState < 3){
     if(player.code === "524"){
       player.codeState = 2
       player.code = ""
@@ -300,7 +300,7 @@ function mainLoop(d=0){
       setTimeout(()=>{player.codeState=0}, 1000)
     }
   }
-  if(player.countdown.lt(0)&&player.gameBegun){
+  if(player.countdown.lt(0) && player.gameBegun){
     die(maxTime)
   }
   if(hasChalMilestone(6)){
@@ -310,6 +310,7 @@ player.challengeTimes[3] = 0
 player.challengeTimes[4] = 0
 }
   if((player.timeInChallenge >= player.challengeTimes[player.challenge]) && player.challenge != 0) exitChallenge()
+  
   if(player.extraTimesEscaped >= 92 && player.challenge != 0){
       player.challengeTimes[player.challenge] = player.timeInChallenge
       player.challenge = 0
