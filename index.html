@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Out With a Bang</title>
+    <link rel="icon" type="image/png" href="https://cdn.glitch.global/46589999-cc84-47c9-8958-87911c354667/69b9b8ad-e24c-485b-b3c9-3ca8f4ecb300-large16x9_nuclearprepare.png?v=1656337009415">
+    <link rel="stylesheet" href="style.css" id="style" />
+    <script src="format.js" defer></script>
+    <script src="game.js" defer></script>
+    <script src="save.js" defer></script>
+    <script src="epsilon.js" defer></script>
+    <script src="missions.js" defer></script>
+    <script src="ehehe.js" defer></script>
+    <script src="hold.js" defer></script>
+    <script src="break_eternity.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12" defer></script>
+  </head>
+  <body>
+    <div id="app">
+    <div id="theRealWorld" v-if="(player.extraTimesEscaped < 92 || player.epsilons > 0) && (!hasEpsUpgrade(1)||player.gameWon)">
+    <div id="countdown" class="countdown">
+      {{formatSmall(player.countdown)}} seconds remain.
+    </div>
+    <div style="color: #BD9100" v-if="hasEscUpgrade(16) && player.epsilons == 0">
+      You require 100 Escapes to Epsilon.
+    </div>
+    <div id="epsilonTimer" style="color: #BD9100" v-if="player.challenge != 0">
+      {{formatTime(player.challengeTimes[player.challenge] - player.timeInChallenge)}} remain.
+    </div><br>
+    <button id="epsilonButton" class="epsilonTab" v-if="player.epsilons >= 1" onclick="ε()">
+      Epsilon for {{format(ipFormula())}} IP<br>{{ipFormula().lt(100) ? "(Next At: " + format(new Decimal(ipFormula().add(1)).log(1.05).add(100).ceil()) + " escapes)" : ''}}
+    </button><br v-if="player.epsilons >= 1"><br v-if="player.epsilons >= 1">
+    <button id="tab1" class="tab" onclick="tab('dashboard')">Dashboard</button>
+    <button id="tab2" class="tab" onclick="tab('options')">Options</button>
+    <button id="tab3" class="tab" onclick="tab('stats')">Statistics</button>
+    <button id="tab4" class="tab" onclick="tab('achs')">Missions</button>
+    <button id="tab5" class="countdownTab" onclick="tab('countdown')" v-if="player.countdownPoints.gt(0) || player.epsilons > 0">Countdown</button>
+    <button id="tab6" class="escapeTab" onclick="tab('escape')" v-if="player.timesEscaped > 0 || player.epsilons > 0">Escape</button>
+    <button id="tab7" class="epsilonTab" onclick="tab('epsilon')" v-if="player.extraTimesEscaped >= 92 || player.epsilons > 0">Epsilon</button><br><br>
+    <div id="energy" v-if="player.gameBegun || player.epsilons >= 10">
+      You have {{format(player.energy)}} energy.<br>You are getting {{format(eps())}} energy per second.<br><span style="color: #a6f9ff">You need {{format(escapeReq())}} energy to Escape.</span>
+    </div><br>
+    <div id="tab1disp" v-if="player.currentTab == 'dashboard'"> <!--- DASHBOARD !--->
+      <div id="lore" v-if="!player.gameBegun"><span id="lore2"><b>Story</b><br>After sneaking into your rival's underground headquarters, you find a machine that will stop all production of the company's goods in the factory. What devastation!<br>However, once you press the "ON" button, a text-to-speech voice tells you that you have just activated the network's emergency detonation system.<br>In the event that someone presses the "ON" button without proper DNA identification, nuclear detonators are set to eliminate the entire facility.<br>You now have 2 minutes to escape before you get blown to pieces!</span><br><br>
+        <button id="startGameButton" onclick="player.gameBegun = true">Begin the game</button></div>
+      <button class="coloredButton" style="background-color: red; border-color: red;" v-if="player.gameBegun" onclick="buttonPress(1)">
+        <!--- onmousehold="startHold(buttonPress(1))" onmouseup="stopHold()" !--->
+        Red Button
+      </button>
+      <button class="coloredButton" style="background-color: yellow; border-color: yellow;" v-if="player.gameBegun" onclick="buttonPress(2)">
+        Yellow Button
+      </button>
+      <button class="coloredButton" style="background-color: lime; border-color: lime;" v-if="player.gameBegun" onclick="buttonPress(3)">
+        Green Button
+      </button>
+      <button class="coloredButton" style="background-color: blue; border-color: blue; color: white;" v-if="player.gameBegun" onclick="buttonPress(4)">
+        Blue Button
+      </button>
+      <button class="coloredButton" style="background-color: #410082; border-color: #410082; color: white;" v-if="player.gameBegun && player.timesEscaped >= 5 && player.timesEscaped != 7" onclick="buttonPress(5)">
+        Purple Button
+      </button><br v-if="player.gameBegun && player.timesEscaped >= 8 && player.codeState != 3">
+      <button v-for="a in 5" class="coloredButton" v-if="player.gameBegun && player.timesEscaped >= 8 && player.codeState != 3" @click="buttonPress(a+5)">
+        {{a}}
+      </button><br v-if="player.gameBegun && player.timesEscaped >= 8 && player.codeState != 3"><span v-if="player.gameBegun && player.timesEscaped >= 8 && player.codeState != 3">Use the 5 buttons above to try and find the 3-digit code!<br>(Hints: Button 1 does nothing, and all digits in the combination are unique)<br>{{player.codeState === 1 ? "Incorrect Code. Please try again." : (player.codeState === 2 ? "You guessed the correct code!" : "")}}</span><br><br>
+      <button v-if="player.upgrades.length > 0 && player.gameBegun" onclick="player.upgrades = []">Respec Upgrades</button><br><br>
+      <table class="autocenter">
+      <td v-for="a in upgAmt()">
+          <button :class="{upgradeLocked:player.energy.lt(UPGRADES[a].cost) && !hasUpgrade(a) || (player.upgrades.includes(UPGRADES[a].pair)&&!hasEpsUpgrade(11)),upgradeBuyable:player.energy.gte(UPGRADES[a].cost)&& (!player.upgrades.includes(UPGRADES[a].pair)||hasEpsUpgrade(11)) &&!hasUpgrade(a),upgradeBought:hasUpgrade(a)}" style="height: 150px; width: 200px" @click="buyUpgrade(a)" v-if="player.gameBegun">
+            <span><b>{{UPGRADES[a].title}}</b></span><br>
+            {{UPGRADES[a].desc}}<br>
+            Cost: {{format(UPGRADES[a].cost)}} energy<br>
+            {{UPGRADES[a].effectDisplay() != null ? 'Currently: ' + UPGRADES[a].effectDisplay() : ''}}<br>
+          </button>
+      </td>
+      </table><br><br>
+      <button v-if="player.gameBegun && hasEscUpgrade(4)" :class="{buyableLocked:player.energy.lt(energyBuyableCost()),energyBuyableUnlocked:player.energy.gte(energyBuyableCost())}" onclick="buyEnergyBuyable()">
+            Double energy gain per purchase<br>
+            Amount: {{formatWhole(player.buyables[4])}}<br>
+            Cost: {{format(energyBuyableCost())}} energy<br>
+            Currently: {{format(Decimal.pow(2,player.buyables[4]))}}x energy/second<br>
+          </button><br><br>
+      <button id="escapeButton" class="escapeTab" v-if="player.energy.gte(escapeReq())" onclick="escape1()">
+        Escape for {{format(Decimal.pow(2,player.timesEscaped+player.extraTimesEscaped))}} Escape Points
+      </button>
+    </div>
+    <div id="tab2disp" v-if="player.currentTab == 'options'"> <!--- OPTIONS !--->
+      <button onclick="save()">
+        Save
+      </button>
+      <button onclick="exportSave()">
+        Export
+      </button>
+      <button onclick="importSave()">
+        Import
+      </button>
+      <button onclick="player.antiEpilepsy = !player.antiEpilepsy">
+        Dynamic Countdown Color: {{player.antiEpilepsy ? "OFF" : "ON"}}
+      </button>
+      <button onclick="player.currentTheme = !player.currentTheme; document.getElementById('style').href = player.currentTheme ? 'style.css' : 'light.css';">
+        Current Theme: {{player.currentTheme ? "Dark" : "Light"}}
+      </button>
+      <button onclick="hardReset()">
+        Hard Reset
+      </button><br v-if="player.gameWon && !player.newContent"><br v-if="player.gameWon && !player.newContent">
+      <button v-if="player.gameWon && !player.newContent" onclick="newContent()">
+        New Content: OFF
+      </button>
+      <br><br>
+      Made by randomtuba#8432 for the Void Development Jam 2.0<br>Game Jam Theme: <b>Out of Time</b><br><br>
+      Use B to begin the game, use E to Escape{{hasEscUpgrade(6) ? ", use D to Decelerate" : ''}}{{player.epsilons >= 1 ? ", use I to Epsilon" : ''}}{{hasEpsUpgrade(3) ? ", use T to Dilate Time" : ''}}.<br><br>
+      Current Version: v1.0.2.4<br>The Enter trick is required for certain sections of this game.<br><span style="color:red">Warning: This game contains flashing colors and UI.</span><br><br><a href="https://discord.gg/HhcavwM5rm" target="_blank">Discord Link</a><br><br><br><br><span id="ehehe">ehehe()</span>
+      </div>
+    <div id="tab3disp" v-if="player.currentTab == 'stats'"> <!--- STATISTICS !--->
+      <button id="subtab9" onclick="player.statisticsTab = 'stats'">Statistics</button>
+      <button id="subtab10" onclick="player.statisticsTab = 'log'">Lore Log</button><br><br>
+      <div id="tab3-1disp" v-if="player.statisticsTab == 'stats'">
+        <b>General</b><br>
+        You have generated {{format(player.totalEnergy)}} energy in total.<br>
+        You have bought {{player.upgrades.length}} Energy Upgrades.<br>
+        You have pressed {{format(player.totalButtonPresses)}} buttons in total.<br>
+        You have bought {{formatWhole(player.buyables[1]+player.buyables[2]+player.buyables[3]+player.buyables[4]+player.buyables[5]+player.buyables[6]+player.buyables[7]+player.buyables[8]+player.buyables[9]+player.buyables[10]+player.spacetime[4]+player.spacetime[5]+player.spacetime[6]+player.condensedST[4]+player.condensedST[5]+player.condensedST[6])}} buyables in total.<br>
+        You have played this game for {{formatTime(player.timePlayed)}}.<br><br>
+        <span v-if="player.totalCP.gt(0)">
+        <b style="color: #E6756B">Countdown</b><br>
+        You have died {{format(player.timesDied)}} times.<br>
+        You have gained {{format(player.totalCP)}} Countdown Points in total.
+        <br><br>
+        </span>
+        <span v-if="player.timesEscaped > 0 || player.epsilons > 0">
+        <b style="color: #a6f9ff">Escape</b><br>
+        You have Escaped {{format(player.timesEscaped+player.extraTimesEscaped)}} times.<br>
+        You have bought {{player.escapeUpgrades.length}} Escape Upgrades.<br>
+        You have gained {{format(player.totalEP)}} Escape Points in total.<br>
+        <span v-if="player.totalDP.gt(0)">
+        For every in-game second that passes, {{formatTimeLong(1/timeSpeed())}} pass in real life.<br>
+        You have Decelerated {{formatWhole(player.timesDecelerated)}} times.<br>
+        You have generated {{format(player.totalDP)}} Deceleration Power in total.<br>
+        </span>
+        <span v-if="player.totalSE.gt(0)">
+        You have generated {{format(player.totalSE)}} Super-Energy in total.<br>
+        You have bought {{formatWhole(player.generators[1].add(player.generators[2]).add(player.generators[3]).add(player.generators[4]).add(player.generators[5]).add(player.generators[6]))}} Generators in total.<br>
+        You have produced {{format(player.generators[7].add(player.generators[8]).add(player.generators[9]))}} Generators this run.
+        </span>
+        <br><br>
+        </span>
+        <span v-if="player.epsilons > 0">
+        <b style="color:#BD9100">Epsilon</b><br>
+        You have Epsiloned {{player.epsilons}} times.<br>
+        You have bought {{player.epsilonUpgrades.length}} Epsilon Upgrades.<br>
+        You have gained {{format(player.totalIP)}} Instant Points in total.<br>
+        <span v-if="hasEpsUpgrade(3)">You have Dilated Time {{formatWhole(player.timesDilated)}} times.</span>
+        </span>
+      </div>
+      <div id="tab3-2disp" v-if="player.statisticsTab == 'log'">
+        <div v-if="player.totalEnergy.gt(0)">
+          <b>Story</b><br>After sneaking into your rival's underground headquarters, you find a machine that will stop all production of the company's goods in the factory. What devastation!<br>However, once you press the "ON" button, a text-to-speech voice tells you that you have just activated the network's emergency detonation system.<br>In the event that someone presses the "ON" button without proper DNA identification, nuclear detonators are set to eliminate the entire facility.<br>You now have 2 minutes to escape before you get blown to pieces!
+        </div><br>
+        <div v-if="player.countdownPoints.gt(0) || player.timesEscaped > 3 || player.epsilons > 0">
+          <b>Death</b><br>When the timer hits zero, a white light surrounds you, and in a single visceral instant, your body is obliterated, as your bones burn to a crisp in the vast expanse of light.<br>The darkness comes to you, and it is quick and total.
+        </div><br>
+        <div v-if="player.timesEscaped > 0 || player.epsilons > 0">
+          <b>Escape</b><br>Finally! You have won. Upon generating enough energy, you step out of the door, and run as far as you can.<br>Months later, a new facility is built, with tighter security. Maybe you can blow up their building again...
+        </div><br>
+        <div v-if="player.epsilons > 0">
+          <b>Epsilon</b><br>You Escape, again and again and again and again, the timer getting smaller and smaller, but it doesn't matter.<br>
+      Your Decelerator allows you to think clearly with no significant time crunch, and you become more and more powerful with Super-Energy.<br>
+      Eventually, your Decelerator becomes so powerful that suddenly, the time speed becomes <b>infinitesimal</b>, and time stops.<br>
+      Everything is frozen. You try to turn the Decelerator off, but then you accidently press a wrong button, and the Arrow of Time is reversed.<br>
+      Billions of years pass in reverse chronological order, and you are now back at square one.
+        </div><br>
+        <div v-if="hasEpsUpgrade(1)">
+          <b>Winner</b><br>As you buy the final Epsilon Upgrade, the world spins around you, and the Multiverse collapses into a single point.<br>
+      After an eternity passes, that single point begins to expand, resulting in the birth of a new Multiverse.<br>
+      After sneaking into your rival's underground headquarters, you find a machine that will stop all production of the company's goods in the factory. What devastation!<br>
+      Once you press the "ON" button, a text-to-speech voice says "Stopping all production", and you exit the facility. Welp, that was easy!
+        </div>
+      </div>
+      </div>
+    <div id="tab4disp" v-if="player.currentTab == 'achs'"> <!--- MISSIONS !--->
+      You have completed {{player.achievements.length}}/90 missions. ({{format(player.achievements.length / 90 * 100)}}%)<br><br>
+      <table class="autocenter">
+      <tr v-for="a in missionAmt()">
+      <td v-for="b in 9">
+          <button :class="{achievementLocked:!player.achievements.includes(getMissionNumber(a,b).toString()),achievementCompleted:player.achievements.includes(getMissionNumber(a,b).toString())}" style="height: 150px; width: 150px">
+            <span><b>{{MISSIONS[getMissionNumber(a,b)].name}}</b></span><br>
+            {{MISSIONS[getMissionNumber(a,b)].desc}}<br>
+          </button>
+      </td>
+      </tr>
+      </table><br><br>
+      </div>
+    <div id="tab5disp" v-if="player.currentTab == 'countdown'"> <!--- COUNTDOWN !--->
+      You have <span id="cPoints" class="countdown">{{format(player.countdownPoints)}}</span> Countdown Points.<br>
+      <span style="font-size: 11px;">Countdown Points are gained based on your energy when the countdown reaches zero.</span><br><br>
+      <table class="autocenter">
+      <td v-for="a in 3">
+          <button :class="{buyableLocked:player.countdownPoints.lt(BUYABLES[a].cost()),buyableUnlocked:player.countdownPoints.gte(BUYABLES[a].cost())}" @click="buyBuyable(a)">
+            {{typeof BUYABLES[a].desc == "function" ? BUYABLES[a].desc() : BUYABLES[a].desc}}<br>
+            Amount: {{formatWhole(player.buyables[a])}}{{a == 1 && new Decimal(player.challengeTimes[2]).lt(600) ? ' + ' + CHALLENGES[2].effect() : ''}}<br>
+            Cost: {{format(BUYABLES[a].cost())}} CP<br>
+            Currently: {{BUYABLES[a].effectDisplay()}}<br>
+          </button>
+      </td>
+      </table>
+      </div>
+    <div id="tab6disp" v-if="player.currentTab == 'escape'"> <!--- ESCAPE !--->
+      You have <span style="color: #a6f9ff; font-size: 20px;">{{format(player.escapePoints)}}</span> Escape Points.<br>
+      <span style="font-size: 11px;">Every Escape gives 2x more Escape Points than the previous, however the starting countdown is reduced by 25% and the Escape requirement is multiplied by 100.</span><br><br>
+      <button id="subtab1" class="escapeTab" style="font-size: 14px" onclick="subtab('upgrades')" v-if="hasEscUpgrade(6) || hasMilestone(3)">Upgrades</button>
+      <button id="subtab2" class="escapeTab" style="font-size: 14px" onclick="subtab('decelerator')" v-if="hasEscUpgrade(6) || hasMilestone(3)">Decelerator</button>
+      <button id="subtab3" class="escapeTab" style="font-size: 14px" onclick="subtab('auto')" v-if="hasEscUpgrade(8) || hasMilestone(3)">Automation</button>
+      <button id="subtab4" class="escapeTab" style="font-size: 14px" onclick="subtab('super')" v-if="hasEscUpgrade(13)">Super-Energy</button><br v-if="hasEscUpgrade(6)"><br v-if="hasEscUpgrade(6)">
+      <div id="tab6-1disp" v-if="player.currentSubtab == 'upgrades'"> <!--- ESCAPE UPGRADES !--->
+      <table class="autocenter">
+      <tr v-for="a in rowAmt()">
+      <td v-for="b in 4">
+          <button :class="{upgradeLocked:player.escapePoints.lt(ESC_UPGRADES[a*4-4+b].cost) && !hasEscUpgrade(a*4-4+b),upgradeBuyable:player.escapePoints.gte(ESC_UPGRADES[a*4-4+b].cost)&&!hasEscUpgrade(a*4-4+b),upgradeBought:hasEscUpgrade(a*4-4+b)}" style="height: 150px; width: 200px" @click="buyEscUpgrade(a*4-4+b)">
+            <span><b>{{ESC_UPGRADES[a*4-4+b].title}}</b></span><br>
+            {{ESC_UPGRADES[a*4-4+b].desc}}<br>
+            Cost: {{format(ESC_UPGRADES[a*4-4+b].cost)}} EP<br>
+            {{ESC_UPGRADES[a*4-4+b].effectDisplay() != null ? 'Currently: ' + ESC_UPGRADES[a*4-4+b].effectDisplay() : ''}}<br>
+          </button>
+      </td>
+      </tr>
+      </table><br><br>
+      </div>
+      <div id="tab6-2disp" v-if="player.currentSubtab == 'decelerator'"> <!--- DECELERATOR !--->
+        <span style="color:#0C9FED">You have {{format(player.deceleratePower)}} Deceleration Power. ({{format(dpps())}}/sec)<br>Time Speed: {{formatSmall(timeSpeed())}}x</span><br><br>Enabling the Decelerator will halt your DP generation and subtract from your DP, however you will be able to slow down the speed of the timer.<br><br>
+        <button id="decelerate" class="decelerateButton" onclick="player.decelerated = !player.decelerated; if(player.decelerated){player.timesDecelerated += 1}">{{player.decelerated ? "Disable Decelerator" : "Enable Decelerator"}}</button><br><br>
+        <table class="autocenter">
+        <td v-for="a in 3">
+          <button :class="{buyableLocked:player.deceleratePower.lt(DECEL_BUYABLES[a].cost()),decelBuyableUnlocked:player.deceleratePower.gte(DECEL_BUYABLES[a].cost())}" @click="buyDecelBuyable(a)">
+            {{typeof DECEL_BUYABLES[a].desc == "function" ? DECEL_BUYABLES[a].desc() : DECEL_BUYABLES[a].desc}}<br>
+            Amount: {{formatWhole(player.buyables[a+4])}}<br>
+            Cost: {{format(DECEL_BUYABLES[a].cost())}} DP<br>
+            Currently: {{DECEL_BUYABLES[a].effectDisplay()}}<br>
+          </button>
+        </td>
+        </table>
+      </div>
+      <div id="tab6-3disp" v-if="player.currentSubtab == 'auto'"> <!--- AUTOMATION !--->
+        <span style="font-size: 20px"><b>Welcome to the Automation Hub!</b></span><br>Here you can use different autoclickers and autobuyers that you've unlocked!<br><br>
+        <button id="auto1" onclick="player.autobuyers[1] = !player.autobuyers[1]">Red Button Autoclicker: {{player.autobuyers[1] ? "ON" : "OFF"}}</button><br>
+        <button id="auto2" onclick="player.autobuyers[2] = !player.autobuyers[2]">Blue Button Autoclicker: {{player.autobuyers[2] ? "ON" : "OFF"}}</button><br>
+        <button id="auto3" onclick="player.autobuyers[3] = !player.autobuyers[3]">Purple Button Autoclicker: {{player.autobuyers[3] ? "ON" : "OFF"}}</button><br>
+        <button id="auto4" onclick="player.autobuyers[4] = !player.autobuyers[4]" v-if="hasEscUpgrade(10) || hasMilestone(3)">Energy Buyable Autobuyer: {{player.autobuyers[4] ? "ON" : "OFF"}}</button><br>
+        <button id="auto5" onclick="player.autobuyers[5] = !player.autobuyers[5]" v-if="hasEscUpgrade(10) || hasMilestone(3)">Begin Game Autoclicker: {{player.autobuyers[5] ? "ON" : "OFF"}}</button><br>
+        <button id="auto6" onclick="player.autobuyers[6] = !player.autobuyers[6]" v-if="hasEscUpgrade(11) || hasMilestone(3)">Escape Autoclicker: {{player.autobuyers[6] ? "ON" : "OFF"}}</button><br>
+        <button id="auto7" onclick="player.epsilonAutobuyers[1] = !player.epsilonAutobuyers[1]" v-if="hasMilestone(4) && (player.challenge == 0||hasChalMilestone(1))">Deceleration Buyables Autobuyer: {{player.epsilonAutobuyers[1] ? "ON" : "OFF"}}</button><br>
+        <button id="auto8" onclick="player.epsilonAutobuyers[2] = !player.epsilonAutobuyers[2]" v-if="hasMilestone(5) && (player.challenge == 0||hasChalMilestone(2))">Countdown Buyables Autobuyer: {{player.epsilonAutobuyers[2] ? "ON" : "OFF"}}</button><br>
+        <button id="auto9" onclick="player.epsilonAutobuyers[3] = !player.epsilonAutobuyers[3]" v-if="hasMilestone(6) && (player.challenge == 0||hasChalMilestone(3))">Super-Energy Buyables Autobuyer: {{player.epsilonAutobuyers[3] ? "ON" : "OFF"}}</button><br>
+        <button id="auto10" onclick="player.epsilonAutobuyers[4] = !player.epsilonAutobuyers[4]" v-if="hasMilestone(9) && (player.challenge == 0||hasChalMilestone(4))">Generators Autobuyer: {{player.epsilonAutobuyers[4] ? "ON" : "OFF"}}</button><br>
+      </div>
+      <div id="tab6-4disp" v-if="player.currentSubtab == 'super'"> <!--- SUPER-ENERGY !--->
+        You have <span style="font-size: 20px; color: lime">{{format(player.superEnergy)}}</span> super-energy, multiplying energy gain by {{format(seMult(1))}}x.<br>
+        You are getting {{format(superGen())}} super-energy per second.
+        <br v-if="player.buyables[10] >= 1"><span style="color:#E6756B" v-if="player.buyables[10] >= 1">Your super-energy is also multiplying Countdown Point gain by {{format(seMult(2))}}x.</span>
+        <br v-if="player.buyables[10] >= 2"><span style="color:blue" v-if="player.buyables[10] >= 2">Your super-energy is also dividing time speed while Decelerated by /{{format(seMult(3))}}.</span>
+        <br v-if="hasEpsUpgrade(16)"><span style="color:#0C9FED" v-if="hasEpsUpgrade(16)">Your super-energy is also multiplying Deceleration Power gain by {{format(seMult(4))}}x.</span>
+        <br>Your summative generator purchases are speeding up the production of generators by <span style="font-size: 20px; color: lime">{{format(summativeGeneratorMult())}}</span>x!<br><br>
+        <div v-for="a in 6" v-if="GENERATORS[a].unl()">
+        <span>Generator {{a}} - Amount: {{format(player.generators[a])}}{{a == 1 || a == 2 || a == 5 ? " [+" + format(producedGenerator(a)) + "]" : ''}}</span><br>
+        <button :class="{generatorLocked:player.escapePoints.lt(GENERATORS[a].cost()),generatorUnlocked:player.escapePoints.gte(GENERATORS[a].cost())}" @click="buyGenerator(a)">Buy for {{format(GENERATORS[a].cost())}} EP</button><br>
+        <button :class="{generatorLocked:player.generators[a].eq(0),generatorUnlocked:player.generators[a].gt(0)}" @click="sellOne(a)">Sell One</button><br><br>
+      </div>
+        <table class="autocenter">
+        <td v-for="a in 3">
+          <button :class="{buyableLocked:player.superEnergy.lt(SUPER_BUYABLES[a].cost()),superBuyableUnlocked:player.superEnergy.gte(SUPER_BUYABLES[a].cost())}" @click="buySuperBuyable(a)">
+            {{SUPER_BUYABLES[a].desc}}<br>
+            Amount: {{formatWhole(player.buyables[a+7])}}{{a == 1 && hasEscUpgrade(16) ? ' + ' + player.buyables[9] : ''}}{{a == 2 && new Decimal(player.challengeTimes[3]).lt(600) ? ' + ' + CHALLENGES[3].effect() : ''}}{{a == 3 ? "/2" : ''}}<br>
+            Cost: {{a==3 && SUPER_BUYABLES[a].cost() == Infinity ? "Maxed!" : format(SUPER_BUYABLES[a].cost()) + " SE"}}<br>
+            Currently: {{SUPER_BUYABLES[a].effectDisplay()}}<br>
+          </button>
+        </td>
+        </table>
+      </div>
+      </div>
+      <div id="tab7disp" v-if="player.currentTab == 'epsilon'"> <!--- EPSILON !--->
+        You have <span style="color: #BD9100; font-size: 20px;">{{format(player.instantPoints)}}</span> Instant Points.<br>
+      <span style="font-size: 11px;">Instant Points are gained based on your times Escaped when you Epsilon.</span><br><br>
+      <button id="subtab5" class="epsilonTab" style="font-size: 14px" onclick="epsilontab('milestones')">Milestones</button>
+      <button id="subtab6" class="epsilonTab" style="font-size: 14px" onclick="epsilontab('epsupgs')">Epsilon Upgrades</button>
+      <button id="subtab7" class="epsilonTab" style="font-size: 14px" onclick="epsilontab('challenges')" v-if="hasEpsUpgrade(13)">Challenges</button>
+        <button id="subtab8" class="epsilonTab" style="font-size: 14px" onclick="epsilontab('stime')" v-if="hasEpsUpgrade(14)">Spacetime</button><br><br>
+      <div id="tab7-1disp" v-if="player.epsilonTab == 'milestones'"> <!--- MILESTONES !--->
+        <div v-for="a in 11">
+          <button :class="{milestoneLocked:player.epsilons < MILESTONES[a].requirement,milestoneUnlocked:player.epsilons >= MILESTONES[a].requirement}">
+            <b style="font-size: 20px;">{{MILESTONES[a].title}}</b><br>{{MILESTONES[a].desc}}
+          </button><br>
+        </div>
+      </div>
+      <div id="tab7-2disp" v-if="player.epsilonTab == 'epsupgs'"> <!--- EPSILON UPGRADES !--->
+      <table class="autocenter">
+        <tr v-for="a in 4">
+        <td v-for="b in 4">
+          <button :class="{upgradeLocked:player.instantPoints.lt(EPS_UPGRADES[a*4-4+b].cost) && !hasEpsUpgrade(a*4-4+b),upgradeBuyable:player.instantPoints.gte(EPS_UPGRADES[a*4-4+b].cost)&&!hasEpsUpgrade(a*4-4+b),upgradeBought:hasEpsUpgrade(a*4-4+b)}" style="height: 150px; width: 200px" @click="buyEpsUpgrade(a*4-4+b)">
+            <span><b>{{EPS_UPGRADES[a*4-4+b].title}}</b></span><br>
+            {{EPS_UPGRADES[a*4-4+b].desc}}<br>
+            Cost: {{format(EPS_UPGRADES[a*4-4+b].cost)}} IP<br>
+            {{EPS_UPGRADES[a*4-4+b].effectDisplay() != null ? 'Currently: ' + EPS_UPGRADES[a*4-4+b].effectDisplay() : ''}}<br>
+          </button>
+        </td>
+        </tr>
+      </table>
+      </div>
+      <div id="tab7-3disp" v-if="player.epsilonTab == 'challenges'"> <!--- CHALLENGES !--->
+      <span style="font-size: 20px"><b>Welcome to the Challenges Hub!</b></span><br>Here you can complete harder Epsilons as fast as possible!<br>Some of your milestones are disabled within Challenges. You can enable them by reaching the Challenge Milestones below.<br>In a Challenge, you must complete the challenge faster than your best time.<br>If your challenge time goes over your best time, you automatically exit the challenge, and your stats are not reset.<br>Exiting a challenge manually disables the nerf and timer, and does not reset your stats.<br>Completing a challenge kicks you out automatically, does not reset your stats, and sets your best time for that challenge to the time at which you completed the challenge.<br><br>Your summative challenge time is {{formatTime(summativeChallengeTime())}}.<br><br>
+        <span :class="{chalMilestoneLocked:!hasChalMilestone(1),chalMilestoneUnlocked:hasChalMilestone(1)}">25 minutes of SCT: Milestone 4 is enabled in challenges</span><br>
+        <span :class="{chalMilestoneLocked:!hasChalMilestone(2),chalMilestoneUnlocked:hasChalMilestone(2)}">20 minutes of SCT: Milestone 5 is enabled in challenges</span><br>
+        <span :class="{chalMilestoneLocked:!hasChalMilestone(3),chalMilestoneUnlocked:hasChalMilestone(3)}">15 minutes of SCT: Milestones 6 and 8 are enabled in challenges, you also keep Energy Upgrades</span><br>
+        <span :class="{chalMilestoneLocked:!hasChalMilestone(4),chalMilestoneUnlocked:hasChalMilestone(4)}">10 minutes of SCT: Milestone 9 is enabled in challenges</span><br>
+        <span :class="{chalMilestoneLocked:!hasChalMilestone(5),chalMilestoneUnlocked:hasChalMilestone(5)}">3 minutes of SCT: Milestone 10 is enabled in challenges</span><br>
+        <span :class="{chalMilestoneLocked:!hasChalMilestone(6),chalMilestoneUnlocked:hasChalMilestone(6)}">1 minute of SCT: Gain the maximum rewards of all the challenges</span><br>
+      <button onclick="exitChallenge()" v-if="player.challenge != 0 && player.extraTimesEscaped < 92">Exit Challenge</button><br><br>
+      <table class="autocenter">
+        <tr v-for="a in 2">
+        <td v-for="b in 2">
+          <button style="height: 200px; width: 400px; font-size: 14px;" :class="{epsilonTab:player.challenge != a*2-2+b,unlockedChallenge:player.challenge == a*2-2+b}" @click="enterChallenge(a*2-2+b)">
+            <span><b>{{CHALLENGES[a*2-2+b].title}}</b></span><br>
+            <span><b>Best Time: {{formatTime(player.challengeTimes[a*2-2+b])}}</b></span><br><br>
+            {{CHALLENGES[a*2-2+b].desc}}<br>
+            Reward: {{CHALLENGES[a*2-2+b].rewardDesc}}<br>
+            Currently: {{CHALLENGES[a*2-2+b].effectDisplay()}}<br>
+          </button>
+        </td>
+        </tr>
+      </table>
+      </div>
+      <div id="tab7-4disp" v-if="player.epsilonTab == 'stime'"> <!--- SPACETIME !--->
+        <span style="color:cyan;">Finally, you're no longer <b>Out of Time</b>...!</span><br><br>
+        You have <span style="color: orange; font-size: 20px;">{{format(player.spacetime[1])}}</span> space. (generated based on CP) ({{format(player.countdownPoints.max(0).pow(0.0025).add(1).mul(CONDENSERS[1].effect()).mul(spacetimeMults()))}}/sec)<br>
+        You have <span style="color: #008a27; font-size: 20px;">{{format(player.spacetime[2])}}</span> time. (generated based on DP) ({{format(player.deceleratePower.max(0).pow(0.02).add(1).mul(CONDENSERS[2].effect()).mul(spacetimeMults()))}}/sec)<br>
+        You have <span style="color: cyan; font-size: 20px;">{{format(player.spacetime[3])}}</span> spacetime. (generated based on space and time) ({{format(player.spacetime[1].mul(player.spacetime[2]).pow(0.25).mul(CONDENSERS[3].effect()).mul(spacetimeMults()))}}/sec)<br><br>
+        <span id="condensed" v-if="player.newContent">
+           You have <span style="color: #915200; font-size: 20px;">{{format(player.condensedST[1])}}</span> condensed space. (generated based on space) ({{format(player.spacetime[1].div(1e30).pow(0.3).mul(CONDENSERS_2[1].effect()))}}/sec)<br>
+        You have <span style="color: #3c5c3b; font-size: 20px;">{{format(player.condensedST[2])}}</span> condensed time. (generated based on time) ({{format(player.spacetime[2].div(1e32).pow(0.3).mul(CONDENSERS_2[2].effect()))}}/sec)<br>
+        You have <span style="color: teal; font-size: 20px;">{{format(player.condensedST[3])}}</span> condensed spacetime. (generated based on spacetime) ({{format(player.spacetime[3].div(1e45).pow(0.3).mul(CONDENSERS_2[3].effect()))}}/sec)<br><br>
+        </span>
+        <table class="autocenter">
+        <td v-for="a in 3">
+          <button style="height: 250px; width: 250px;" :class="{buyableLocked:player.spacetime[a].lt(CONDENSERS[a].cost()),condenserUnlocked:player.spacetime[a].gte(CONDENSERS[a].cost())}" @click="buyCondenser(a)">
+            <span><b>{{CONDENSERS[a].title}}</b></span><br>
+            {{CONDENSERS[a].desc}}<br>
+            Amount: {{formatWhole(player.spacetime[a+3])}}<br>
+            Cost: {{format(CONDENSERS[a].cost())}} {{a == 1 ? 'space' : (a == 2 ? 'time' : 'spacetime')}}<br>
+            Currently: {{CONDENSERS[a].effectDisplay()}}<br>
+          </button>
+        </td>
+        </table><br>
+        <table class="autocenter">
+        <td v-for="a in 3" v-if="player.newContent">
+          <button style="height: 250px; width: 250px;" :class="{buyableLocked:player.condensedST[a].lt(CONDENSERS_2[a].cost()),condenserUnlocked2:player.condensedST[a].gte(CONDENSERS_2[a].cost())}" @click="buyCondenser2(a)">
+            <span><b>{{CONDENSERS_2[a].title}}</b></span><br>
+            {{CONDENSERS_2[a].desc}}<br>
+            Amount: {{formatWhole(player.condensedST[a+3])}}<br>
+            Cost: {{format(CONDENSERS_2[a].cost())}} {{a == 1 ? 'condensed space' : (a == 2 ? 'condensed time' : 'condensed spacetime')}}<br>
+            Currently: {{CONDENSERS_2[a].effectDisplay()}}<br>
+          </button>
+        </td>
+        </table><br>
+        <div id="timeDilation" v-if="hasEpsUpgrade(3)">
+          You have <span style="color: #ceff46; font-size: 20px;">{{format(player.dilatedTime)}}</span> dilated time, multiplying production of the previous currencies by {{format(dtEffect())}}x and dividing Time Speed by {{player.newContent ? format(player.dilatedTime.add(1).pow(1.5)) : "its amount"}}.<br>You are getting {{format(player.dilated ? Decimal.pow(2,player.extraTimesEscaped-92) : 0)}} Dilated Time per second.<br>
+          <span style="color: #ceff46">Dilating time raises your energy gain to the 0.6th and raises the rest of your pre-Epsilon currencies (excluding EP) to the 0.1st.</span><br>
+          <span style="color: #ceff46">You can gain Dilated Time within Dilation if you have at least 100 Escapes.</span><br><br>
+          <button class="dilationButton" onclick="dilateTime()">
+            {{player.dilated ? "Stop dilation." : "Dilate time."}}
+          </button>
+        </div>
+      </div>
+      </div>
+    </div>
+    <div id="bigCrunch" v-if="player.extraTimesEscaped >= 92 && player.epsilons < 1">
+    <button style="font-size: 200px; border-width: 10px;" class="epsilonTab" onclick="ε()">
+      Epsilon
+    </button><br><br>
+      You Escape, again and again and again and again, the timer getting smaller and smaller, but it doesn't matter.<br>
+      Your Decelerator allows you to think clearly with no significant time crunch, and you become more and more powerful with Super-Energy.<br>
+      Eventually, your Decelerator becomes so powerful that suddenly, the time speed becomes <b>infinitesimal</b>, and time stops.<br>
+      Everything is frozen. You try to turn the Decelerator off, but then you accidently press a wrong button, and the Arrow of Time is reversed.<br>
+      Billions of years pass in reverse chronological order, and you are now back at square one.<br>
+    </div>
+    <div id="winscreen" v-if="hasEpsUpgrade(1) && !player.gameWon">
+      As you buy the final Epsilon Upgrade, the world spins around you, and the Multiverse collapses into a single point.<br>
+      After an eternity passes, that single point begins to expand, resulting in the birth of a new Multiverse.<br>
+      After sneaking into your rival's underground headquarters, you find a machine that will stop all production of the company's goods in the factory. What devastation!<br>
+      Once you press the "ON" button, a text-to-speech voice says "Stopping all production", and you exit the facility. Welp, that was easy!<br><br><br>
+      <b style="font-size: 40px;">Congratulations! You have won the game.</b><br><br>
+      It took you {{formatTime(player.timePlayed)}} to beat the game.<br><br>
+      <button onclick="player.gameWon = true">
+        Keep Going
+      </button>
+      <button onclick="hardReset()">
+        Play Again
+      </button>
+    </div>
+    </div>
+  </body>
+</html>
